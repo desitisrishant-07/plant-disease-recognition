@@ -9,19 +9,19 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
 
 WORKDIR /app
 
-# Install Python deps first (layer caching)
+# Install deps with --no-cache-dir to avoid stale layer cache
 COPY requirements.txt .
-RUN pip install --no-cache-dir -r requirements.txt
+RUN pip install --no-cache-dir --upgrade pip && \
+    pip install --no-cache-dir -r requirements.txt && \
+    pip install --no-cache-dir PyMySQL cryptography
 
 # Copy app code
 COPY . .
 
-# Create upload directories
+# Create upload dirs
 RUN mkdir -p uploadimages/history
 
-# Railway uses PORT env var
 ENV PORT=8080
 EXPOSE 8080
 
-# Gunicorn start
 CMD gunicorn --bind 0.0.0.0:${PORT} --workers 2 --threads 4 --timeout 120 app:app
