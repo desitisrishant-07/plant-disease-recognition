@@ -1,21 +1,14 @@
 FROM python:3.11-slim
 
-# Git aur Git LFS install karein
-RUN apt-get update && \
-    apt-get install -y git git-lfs && \
-    git lfs install
-
+# Working directory set karein
 WORKDIR /app
 
-# GitHub se seedha clone karein taaki LFS (model file) sahi se download ho
-# Niche apna GitHub link daalein
-RUN git clone https://github.com/desitisrishant-07/plant-disease-recognition.git .
-
-# Check karein ki asli model download hua ya nahi (250M dikhna chahiye)
-RUN ls -lh models/plant_disease_recog_model_pwp.keras
-
-# Dependencies install karein
+# Requirements copy karein aur install karein (isme ab TensorFlow nahi hai)
+COPY requirements.txt .
 RUN pip install --no-cache-dir -r requirements.txt
+
+# Poora project copy karein
+COPY . .
 
 # App start karein
 CMD gunicorn app:app --bind 0.0.0.0:$PORT --workers 1 --threads 4 --timeout 120
