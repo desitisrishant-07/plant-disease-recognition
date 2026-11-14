@@ -12,13 +12,15 @@ import tensorflow as tf
 import pymysql
 
 
+
 # ---------- DB ----------
 def get_db_connection():
     return pymysql.connect(
-        host='localhost',
-        user='root',
-        password='Dada@9090',
-        database='plant_care_db',
+        host=os.environ.get('MYSQLHOST', 'localhost'),
+        user=os.environ.get('MYSQLUSER', 'root'),
+        password=os.environ.get('MYSQLPASSWORD', 'Dada@9090'),
+        database=os.environ.get('MYSQLDATABASE', 'plant_care_db'),
+        port=int(os.environ.get('MYSQLPORT', 3306)),
         cursorclass=pymysql.cursors.DictCursor
     )
 
