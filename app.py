@@ -2,13 +2,11 @@ from flask import (Flask, render_template, request, redirect,
                    send_from_directory, url_for, session, flash)
 from werkzeug.security import generate_password_hash, check_password_hash
 from functools import wraps
-import numpy as np
 import json
 import uuid
 import os
 import time
 import shutil
-import tensorflow as tf
 import pymysql
 
 
@@ -90,12 +88,6 @@ def inject_globals():
 def uploaded_images(filename):
     return send_from_directory('./uploadimages', filename)
 
-
-# ---------- MODEL UTILS ----------
-def extract_features(image):
-    image = tf.keras.utils.load_img(image, target_size=(160, 160))
-    feature = tf.keras.utils.img_to_array(image)
-    return np.array([feature])
 
 
 def model_predict(image_path):
