@@ -1,23 +1,21 @@
 FROM python:3.11-slim
 
-# curl install karein
-RUN apt-get update && apt-get install -y curl
+# Git aur Git LFS install karein
+RUN apt-get update && \
+    apt-get install -y git git-lfs && \
+    git lfs install
 
 WORKDIR /app
 
-COPY requirements.txt .
-RUN pip install --no-cache-dir -r requirements.txt
+# GitHub se seedha clone karein taaki LFS (model file) sahi se download ho
+# Niche apna GitHub link daalein
+RUN git clone https://github.com/desitisrishant-07/plant-disease-recognition.git .
 
-COPY . .
-
-# Models folder banayein (agar pehle se nahi hai)
-RUN mkdir -p models
-
-# MODEL DOWNLOAD KAREIN (Yahan apna Step 1 wala link daalein)
-RUN curl -L -o models/plant_disease_recog_model_pwp.keras "https://media.githubusercontent.com/media/desitisrishant-07/plant-disease-recognition/main/models/plant_disease_recog_model_pwp.keras"
-
-# Verification: Check karein ki file download hui hai aur uska size kya hai
+# Check karein ki asli model download hua ya nahi (250M dikhna chahiye)
 RUN ls -lh models/plant_disease_recog_model_pwp.keras
 
-# Gunicorn start karein
+# Dependencies install karein
+RUN pip install --no-cache-dir -r requirements.txt
+
+# App start karein
 CMD gunicorn app:app --bind 0.0.0.0:$PORT --workers 1 --threads 4 --timeout 120
