@@ -1,8 +1,7 @@
-Flask
+﻿Flask
 Werkzeug
 PyMySQL
 cryptography
 gunicorn
 requests
 Pillow
-python-dotenv
