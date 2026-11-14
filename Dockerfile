@@ -9,11 +9,18 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
 
 WORKDIR /app
 
-# Install deps with --no-cache-dir to avoid stale layer cache
+# Upgrade pip first
+RUN pip install --no-cache-dir --upgrade pip
+
+# Install from requirements.txt
 COPY requirements.txt .
-RUN pip install --no-cache-dir --upgrade pip && \
-    pip install --no-cache-dir -r requirements.txt && \
-    pip install --no-cache-dir PyMySQL cryptography
+RUN pip install --no-cache-dir -r requirements.txt
+
+# EXPLICIT install — guarantee PyMySQL even if requirements.txt fails
+RUN pip install --no-cache-dir PyMySQL cryptography
+
+# Verify pymysql is importable (build will fail here if broken)
+RUN python -c "import pymysql; print('PyMySQL OK:', pymysql.__version__)"
 
 # Copy app code
 COPY . .
