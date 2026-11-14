@@ -1,7 +1,7 @@
 FROM python:3.11-slim
 
-# wget install karein (model download karne ke liye)
-RUN apt-get update && apt-get install -y wget
+# curl install karein
+RUN apt-get update && apt-get install -y curl
 
 WORKDIR /app
 
@@ -10,9 +10,11 @@ RUN pip install --no-cache-dir -r requirements.txt
 
 COPY . .
 
-# Model ko GitHub LFS se download karein
-# NOTE: Niche URL mein "desit" aur "plant-disease-recognition" aapke GitHub username aur repo name se match hone chahiye.
-RUN wget -O models/plant_disease_recog_model_pwp.keras https://media.githubusercontent.com/media/desitisrishant-07/plant-disease-recognition/main/models/plant_disease_recog_model_pwp.keras
+# Model file download karein (Yahan apna Step 1 wala exact link paste karein)
+RUN curl -L -o models/plant_disease_recog_model_pwp.keras "https://github.com/desitisrishant-07/plant-disease-recognition/raw/refs/heads/main/models/plant_disease_recog_model_pwp.keras"
+
+# Check karein ki file sach mein download hui hai ya nahi
+RUN ls -lh models/
 
 # Gunicorn start karein
 CMD gunicorn app:app --bind 0.0.0.0:$PORT --workers 1 --threads 4 --timeout 120
