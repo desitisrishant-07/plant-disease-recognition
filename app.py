@@ -32,7 +32,10 @@ os.makedirs('./uploadimages', exist_ok=True)
 os.makedirs('./uploadimages/history', exist_ok=True)
 
 # ---------- MODEL ----------
-model = tf.keras.models.load_model("models/plant_disease_recog_model_pwp.keras")
+import base64
+import requests
+from PIL import Image
+import io
 
 label = [
  'Apple___Apple_scab','Apple___Black_rot','Apple___Cedar_apple_rust','Apple___healthy',
@@ -95,9 +98,49 @@ def extract_features(image):
     return np.array([feature])
 
 
-def model_predict(image):
-    prediction = model.predict(extract_features(image))
-    return plant_disease[prediction.argmax()]
+def model_predict(image_path):
+    try:
+        # Image ko base64 mein convert karein
+        with open(image_path, "rb") as f:
+            image_data = base64.b64encode(f.read()).decode("utf-8")
+
+        # OpenRouter API ko request bhejein
+        response = requests.post(
+            url="https://openrouter.ai/api/v1/chat/completions",
+            headers={
+                "Authorization": f"Bearer {os.environ.get('OPENROUTER_API_KEY')}",
+                "Content-Type": "application/json",
+            },
+            json={
+                # Ye free vision model use kar rahe hain
+                "model": "google/gemini-2.0-flash-exp:free", 
+                "messages": [
+                    {
+                        "role": "user",
+                        "content": [
+                            {"type": "text", "text": "Identify the plant disease in this leaf image. Reply ONLY with the exact disease name from the PlantVillage dataset (e.g., Tomato___Early_blight). Do not write any other text."},
+                            {"type": "image_url", "image_url": {"url": f"data:image/jpeg;base64,{image_data}"}}
+                        ]
+                    }
+                ]
+            },
+            timeout=30
+        )
+        
+        result = response.json()
+        disease_name = result['choices'][0]['message']['content'].strip()
+        
+        # JSON file se match karke details nikaalein
+        for disease in plant_disease:
+            if disease['name'].lower() == disease_name.lower():
+                return disease
+        
+        # Agar exact match na mile to default return karein
+        return {"name": disease_name, "cause": "AI detected this condition.", "cure": "Please consult an expert."}
+        
+    except Exception as e:
+        print(f"OpenRouter Error: {e}")
+        return {"name": "Analysis Failed", "cause": "Could not connect to AI service.", "cure": "Please try again later."}
 
 
 # ═══════════════════════════════════════════════════════════════
