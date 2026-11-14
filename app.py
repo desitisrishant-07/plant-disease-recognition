@@ -13,7 +13,8 @@ import pymysql
 
 
 
-# ---------- DB ----------
+import os
+
 def get_db_connection():
     return pymysql.connect(
         host=os.environ.get('MYSQLHOST', 'localhost'),
@@ -23,7 +24,6 @@ def get_db_connection():
         port=int(os.environ.get('MYSQLPORT', 3306)),
         cursorclass=pymysql.cursors.DictCursor
     )
-
 
 app = Flask(__name__)
 app.secret_key = 'plantcare-ai-super-secret-key-change-me'
