@@ -2,6 +2,7 @@ from flask import (Flask, render_template, request, redirect,
                    send_from_directory, url_for, session, flash)
 from werkzeug.security import generate_password_hash, check_password_hash
 from functools import wraps
+from urllib.parse import urlparse
 import json
 import uuid
 import os
@@ -10,8 +11,25 @@ import shutil
 import pymysql
 
 
-
+# ═══════════════════════════════════════════════════════════════
+# DB CONNECTION — supports both MYSQL_URL and individual vars
+# ═══════════════════════════════════════════════════════════════
 def get_db_connection():
+    # Railway private network URL — best for production
+    db_url = os.environ.get('MYSQL_URL') or os.environ.get('MYSQL_PRIVATE_URL')
+
+    if db_url:
+        parsed = urlparse(db_url)
+        return pymysql.connect(
+            host=parsed.hostname,
+            user=parsed.username,
+            password=parsed.password,
+            database=parsed.path[1:] if parsed.path else 'plant_care_db',
+            port=parsed.port or 3306,
+            cursorclass=pymysql.cursors.DictCursor
+        )
+
+    # Fallback — individual env vars
     return pymysql.connect(
         host=os.environ.get('MYSQLHOST', 'localhost'),
         user=os.environ.get('MYSQLUSER', 'root'),
@@ -28,27 +46,11 @@ app.secret_key = os.environ.get('SECRET_KEY', 'plantcare-ai-dev-only-change-me')
 os.makedirs('./uploadimages', exist_ok=True)
 os.makedirs('./uploadimages/history', exist_ok=True)
 
-# ---------- MODEL (OpenRouter-based, no TensorFlow) ----------
+# ---------- OpenRouter (NO TensorFlow/Keras/numpy) ----------
 import base64
 import requests
 from PIL import Image
 import io
-
-label = [
- 'Apple___Apple_scab','Apple___Black_rot','Apple___Cedar_apple_rust','Apple___healthy',
- 'Background_without_leaves','Blueberry___healthy','Cherry___Powdery_mildew','Cherry___healthy',
- 'Corn___Cercospora_leaf_spot Gray_leaf_spot','Corn___Common_rust','Corn___Northern_Leaf_Blight',
- 'Corn___healthy','Grape___Black_rot','Grape___Esca_(Black_Measles)',
- 'Grape___Leaf_blight_(Isariopsis_Leaf_Spot)','Grape___healthy',
- 'Orange___Haunglongbing_(Citrus_greening)','Peach___Bacterial_spot','Peach___healthy',
- 'Pepper,_bell___Bacterial_spot','Pepper,_bell___healthy','Potato___Early_blight',
- 'Potato___Late_blight','Potato___healthy','Raspberry___healthy','Soybean___healthy',
- 'Squash___Powdery_mildew','Strawberry___Leaf_scorch','Strawberry___healthy',
- 'Tomato___Bacterial_spot','Tomato___Early_blight','Tomato___Late_blight','Tomato___Leaf_Mold',
- 'Tomato___Septoria_leaf_spot','Tomato___Spider_mites Two-spotted_spider_mite',
- 'Tomato___Target_Spot','Tomato___Tomato_Yellow_Leaf_Curl_Virus',
- 'Tomato___Tomato_mosaic_virus','Tomato___healthy'
-]
 
 with open("plant_disease.json", 'r') as file:
     plant_disease = json.load(file)
@@ -89,7 +91,7 @@ def uploaded_images(filename):
 
 
 # ═══════════════════════════════════════════════════════════════
-# OPENROUTER PREDICTION (replaces TensorFlow/Keras)
+# OPENROUTER PREDICTION
 # ═══════════════════════════════════════════════════════════════
 def model_predict(image_path):
     api_key = os.environ.get('OPENROUTER_API_KEY')
@@ -102,11 +104,9 @@ def model_predict(image_path):
         }
 
     try:
-        # Image → base64
         with open(image_path, "rb") as f:
             image_data = base64.b64encode(f.read()).decode("utf-8")
 
-        # OpenRouter API call
         response = requests.post(
             url="https://openrouter.ai/api/v1/chat/completions",
             headers={
@@ -142,7 +142,6 @@ def model_predict(image_path):
 
         result = response.json()
 
-        # Validate response shape
         if 'choices' not in result or not result['choices']:
             print(f"OpenRouter bad response: {result}")
             return {
@@ -153,12 +152,10 @@ def model_predict(image_path):
 
         disease_name = result['choices'][0]['message']['content'].strip()
 
-        # Match with local JSON
         for disease in plant_disease:
             if disease['name'].lower() == disease_name.lower():
                 return disease
 
-        # Fallback if no exact match
         return {
             "name": disease_name,
             "cause": "AI detected this condition.",
@@ -175,7 +172,7 @@ def model_predict(image_path):
 
 
 # ═══════════════════════════════════════════════════════════════
-# ENRICH PREDICTION
+# ENRICH PREDICTION — helper data
 # ═══════════════════════════════════════════════════════════════
 PREVENTION_TIPS = {
     'Fungal': [
@@ -451,7 +448,7 @@ def enrich_prediction(pred):
         }
     elif severity == 'High':
         timeline = {
-            'today': ['⚠️ Isolate the affected plant immediately', 'Remove visibly infected leaves/stems (seal in a bag)', 'Apply first treatment (fungicide/bactericide spray)'],
+            'today': ['Isolate the affected plant immediately', 'Remove visibly infected leaves/stems (seal in a bag)', 'Apply first treatment (fungicide/bactericide spray)'],
             'week': ['Reapply treatment every 5-7 days', 'Remove any newly infected parts daily', 'Avoid overhead watering completely'],
             'ongoing': ['Monitor neighboring plants for spread', 'Improve airflow — prune dense areas', 'Complete the full treatment cycle (2-3 weeks)'],
         }
@@ -814,7 +811,7 @@ def checkout():
     finally:
         conn.close()
     session['cart'] = {}
-    flash('Order placed successfully! 🎉', 'success')
+    flash('Order placed successfully!', 'success')
     return redirect(url_for('orders_page'))
 
 
