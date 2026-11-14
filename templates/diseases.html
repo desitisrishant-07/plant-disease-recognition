@@ -1,0 +1,239 @@
+<!DOCTYPE html>
+<html lang="en" class="scroll-smooth">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Disease Catalog — PlantCare AI</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <script>tailwind.config={theme:{extend:{colors:{brand:{50:'#ecfdf5',100:'#d1fae5',200:'#a7f3d0',500:'#10b981',600:'#059669',700:'#047857',800:'#065f46',900:'#064e3b'}}}}}</script>
+</head>
+<body class="bg-gradient-to-br from-slate-50 via-emerald-50/20 to-teal-50/40 min-h-screen text-slate-800 flex flex-col font-sans antialiased">
+
+    {% include 'partials/header.html' %}
+
+    <main class="flex-grow max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 sm:py-10 w-full">
+        <div class="mb-8 sm:mb-10 text-center max-w-2xl mx-auto">
+            <span class="inline-flex items-center gap-2 bg-brand-100 text-brand-800 text-[10px] sm:text-xs font-bold px-3 sm:px-3.5 py-1.5 rounded-full uppercase tracking-wider mb-3 shadow-sm">
+                <i class="fa-solid fa-book-medical text-brand-600"></i> Comprehensive Knowledge Base
+            </span>
+            <h2 class="text-2xl sm:text-4xl font-extrabold text-slate-900 mb-2 sm:mb-3 tracking-tight">Plant Disease Library</h2>
+            <p class="text-slate-600 text-sm sm:text-base leading-relaxed">
+                Explore supported plant species, view real specimen visuals, identify distinct symptoms, and follow target treatment plans.
+            </p>
+        </div>
+
+        <div class="mb-6 sm:mb-8 flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-3 bg-white p-3 sm:p-4 rounded-2xl shadow-sm border border-slate-100">
+            <div class="relative w-full sm:max-w-md">
+                <i class="fa-solid fa-magnifying-glass absolute left-4 top-1/2 -translate-y-1/2 text-slate-400 text-sm"></i>
+                <input type="text" id="searchInput" oninput="filterDiseases()" placeholder="Search crop or disease..." class="w-full pl-11 pr-4 py-3 rounded-xl border border-slate-200 bg-slate-50/50 focus:outline-none focus:ring-2 focus:ring-brand-500 focus:bg-white text-sm transition-all min-h-[44px]">
+            </div>
+            <span id="diseaseCount" class="text-xs font-bold text-slate-500 sm:hidden text-center">Showing all</span>
+        </div>
+
+        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6" id="diseaseGrid">
+
+            <div class="disease-card bg-white rounded-2xl sm:rounded-3xl shadow-lg shadow-slate-200/50 border border-slate-100 overflow-hidden flex flex-col hover:shadow-xl transition-all">
+                <div class="h-40 sm:h-48 relative overflow-hidden bg-slate-900">
+                    <img src="{{ url_for('static', filename='images/tomato.webp') }}" alt="Tomato Early Blight" class="w-full h-full object-cover hover:scale-105 transition-transform duration-500">
+                    <span class="absolute top-3 right-3 bg-amber-500 text-white text-[10px] uppercase font-extrabold px-2.5 py-1 rounded-full shadow-md">Bacterial</span>
+                    <span class="absolute bottom-3 left-3 bg-slate-900/80 backdrop-blur-md text-white text-[11px] font-bold px-2.5 py-1 rounded-lg border border-white/10">Tomato</span>
+                </div>
+                <div class="p-5 sm:p-6 flex-grow flex flex-col justify-between space-y-3">
+                    <div>
+                        <h3 class="disease-title text-sm sm:text-base font-extrabold text-slate-900 mb-1">Tomato Early Blight</h3>
+                        <p class="text-[11px] sm:text-xs text-brand-600 font-bold mb-2">Alternaria solani</p>
+                        <p class="text-xs text-slate-600 leading-relaxed">Concentric dark brown rings forming target-board spots on lower mature leaves, leading to defoliation.</p>
+                    </div>
+                    <div class="pt-3 border-t border-slate-100">
+                        <span class="text-[10px] font-bold text-slate-400 uppercase block mb-1">Cure Plan</span>
+                        <p class="text-xs text-slate-700 font-medium">Apply copper fungicides; prune lower infected foliage.</p>
+                    </div>
+                </div>
+            </div>
+
+            <div class="disease-card bg-white rounded-2xl sm:rounded-3xl shadow-lg shadow-slate-200/50 border border-slate-100 overflow-hidden flex flex-col hover:shadow-xl transition-all">
+                <div class="h-40 sm:h-48 relative overflow-hidden bg-slate-900">
+                    <img src="{{ url_for('static', filename='images/potato.avif') }}" alt="Potato Late Blight" class="w-full h-full object-cover hover:scale-105 transition-transform duration-500">
+                    <span class="absolute top-3 right-3 bg-amber-500 text-white text-[10px] uppercase font-extrabold px-2.5 py-1 rounded-full shadow-md">Fungal</span>
+                    <span class="absolute bottom-3 left-3 bg-slate-900/80 backdrop-blur-md text-white text-[11px] font-bold px-2.5 py-1 rounded-lg border border-white/10">Potato</span>
+                </div>
+                <div class="p-5 sm:p-6 flex-grow flex flex-col justify-between space-y-3">
+                    <div>
+                        <h3 class="disease-title text-sm sm:text-base font-extrabold text-slate-900 mb-1">Potato Late Blight</h3>
+                        <p class="text-[11px] sm:text-xs text-brand-600 font-bold mb-2">Phytophthora infestans</p>
+                        <p class="text-xs text-slate-600 leading-relaxed">Water-soaked dark lesions with white fungal fuzz underneath during damp weather conditions.</p>
+                    </div>
+                    <div class="pt-3 border-t border-slate-100">
+                        <span class="text-[10px] font-bold text-slate-400 uppercase block mb-1">Cure Plan</span>
+                        <p class="text-xs text-slate-700 font-medium">Spray systemic fungicides (Mancozeb); destroy infected stalks.</p>
+                    </div>
+                </div>
+            </div>
+
+            <div class="disease-card bg-white rounded-2xl sm:rounded-3xl shadow-lg shadow-slate-200/50 border border-slate-100 overflow-hidden flex flex-col hover:shadow-xl transition-all">
+                <div class="h-40 sm:h-48 relative overflow-hidden bg-slate-900">
+                    <img src="{{ url_for('static', filename='images/apple.webp') }}" alt="Apple Black Rot" class="w-full h-full object-cover hover:scale-105 transition-transform duration-500">
+                    <span class="absolute top-3 right-3 bg-amber-500 text-white text-[10px] uppercase font-extrabold px-2.5 py-1 rounded-full shadow-md">Fungal</span>
+                    <span class="absolute bottom-3 left-3 bg-slate-900/80 backdrop-blur-md text-white text-[11px] font-bold px-2.5 py-1 rounded-lg border border-white/10">Apple</span>
+                </div>
+                <div class="p-5 sm:p-6 flex-grow flex flex-col justify-between space-y-3">
+                    <div>
+                        <h3 class="disease-title text-sm sm:text-base font-extrabold text-slate-900 mb-1">Apple Black Rot</h3>
+                        <p class="text-[11px] sm:text-xs text-brand-600 font-bold mb-2">Botryosphaeria obtusa</p>
+                        <p class="text-xs text-slate-600 leading-relaxed">Small purple circular leaf spots expanding into 'frog-eye' necrotic ring patterns.</p>
+                    </div>
+                    <div class="pt-3 border-t border-slate-100">
+                        <span class="text-[10px] font-bold text-slate-400 uppercase block mb-1">Cure Plan</span>
+                        <p class="text-xs text-slate-700 font-medium">Prune dead wood and apply Captan sprays during spring.</p>
+                    </div>
+                </div>
+            </div>
+
+            <div class="disease-card bg-white rounded-2xl sm:rounded-3xl shadow-lg shadow-slate-200/50 border border-slate-100 overflow-hidden flex flex-col hover:shadow-xl transition-all">
+                <div class="h-40 sm:h-48 relative overflow-hidden bg-slate-900">
+                    <img src="{{ url_for('static', filename='images/grape.webp') }}" alt="Grape Black Rot" class="w-full h-full object-cover hover:scale-105 transition-transform duration-500">
+                    <span class="absolute top-3 right-3 bg-amber-500 text-white text-[10px] uppercase font-extrabold px-2.5 py-1 rounded-full shadow-md">Fungal</span>
+                    <span class="absolute bottom-3 left-3 bg-slate-900/80 backdrop-blur-md text-white text-[11px] font-bold px-2.5 py-1 rounded-lg border border-white/10">Grape</span>
+                </div>
+                <div class="p-5 sm:p-6 flex-grow flex flex-col justify-between space-y-3">
+                    <div>
+                        <h3 class="disease-title text-sm sm:text-base font-extrabold text-slate-900 mb-1">Grape Black Rot</h3>
+                        <p class="text-[11px] sm:text-xs text-brand-600 font-bold mb-2">Guignardia bidwellii</p>
+                        <p class="text-xs text-slate-600 leading-relaxed">Reddish-brown leaf spots containing microscopic black spore-producing structures.</p>
+                    </div>
+                    <div class="pt-3 border-t border-slate-100">
+                        <span class="text-[10px] font-bold text-slate-400 uppercase block mb-1">Cure Plan</span>
+                        <p class="text-xs text-slate-700 font-medium">Manage canopy airflow and apply Myclobutanil early.</p>
+                    </div>
+                </div>
+            </div>
+
+            <div class="disease-card bg-white rounded-2xl sm:rounded-3xl shadow-lg shadow-slate-200/50 border border-slate-100 overflow-hidden flex flex-col hover:shadow-xl transition-all">
+                <div class="h-40 sm:h-48 relative overflow-hidden bg-slate-900">
+                    <img src="{{ url_for('static', filename='images/corn.jpg') }}" alt="Corn Common Rust" class="w-full h-full object-cover hover:scale-105 transition-transform duration-500">
+                    <span class="absolute top-3 right-3 bg-amber-500 text-white text-[10px] uppercase font-extrabold px-2.5 py-1 rounded-full shadow-md">Fungal</span>
+                    <span class="absolute bottom-3 left-3 bg-slate-900/80 backdrop-blur-md text-white text-[11px] font-bold px-2.5 py-1 rounded-lg border border-white/10">Corn</span>
+                </div>
+                <div class="p-5 sm:p-6 flex-grow flex flex-col justify-between space-y-3">
+                    <div>
+                        <h3 class="disease-title text-sm sm:text-base font-extrabold text-slate-900 mb-1">Corn Common Rust</h3>
+                        <p class="text-[11px] sm:text-xs text-brand-600 font-bold mb-2">Puccinia sorghi</p>
+                        <p class="text-xs text-slate-600 leading-relaxed">Elongated cinnamon-brown powdery pustules scattered across both leaf surfaces.</p>
+                    </div>
+                    <div class="pt-3 border-t border-slate-100">
+                        <span class="text-[10px] font-bold text-slate-400 uppercase block mb-1">Cure Plan</span>
+                        <p class="text-xs text-slate-700 font-medium">Plant resistant corn hybrids; use protective foliar fungicides.</p>
+                    </div>
+                </div>
+            </div>
+
+            <div class="disease-card bg-white rounded-2xl sm:rounded-3xl shadow-lg shadow-slate-200/50 border border-slate-100 overflow-hidden flex flex-col hover:shadow-xl transition-all">
+                <div class="h-40 sm:h-48 relative overflow-hidden bg-slate-900">
+                    <img src="{{ url_for('static', filename='images/pepper.jpg') }}" alt="Pepper Bacterial Spot" class="w-full h-full object-cover hover:scale-105 transition-transform duration-500">
+                    <span class="absolute top-3 right-3 bg-amber-500 text-white text-[10px] uppercase font-extrabold px-2.5 py-1 rounded-full shadow-md">Bacterial</span>
+                    <span class="absolute bottom-3 left-3 bg-slate-900/80 backdrop-blur-md text-white text-[11px] font-bold px-2.5 py-1 rounded-lg border border-white/10">Pepper</span>
+                </div>
+                <div class="p-5 sm:p-6 flex-grow flex flex-col justify-between space-y-3">
+                    <div>
+                        <h3 class="disease-title text-sm sm:text-base font-extrabold text-slate-900 mb-1">Pepper Bacterial Spot</h3>
+                        <p class="text-[11px] sm:text-xs text-brand-600 font-bold mb-2">Xanthomonas campestris</p>
+                        <p class="text-xs text-slate-600 leading-relaxed">Small, dark water-soaked leaf spots turning brown and causing severe leaf yellowing.</p>
+                    </div>
+                    <div class="pt-3 border-t border-slate-100">
+                        <span class="text-[10px] font-bold text-slate-400 uppercase block mb-1">Cure Plan</span>
+                        <p class="text-xs text-slate-700 font-medium">Use certified disease-free seeds and copper sprays.</p>
+                    </div>
+                </div>
+            </div>
+
+            <div class="disease-card bg-white rounded-2xl sm:rounded-3xl shadow-lg shadow-slate-200/50 border border-slate-100 overflow-hidden flex flex-col hover:shadow-xl transition-all">
+                <div class="h-40 sm:h-48 relative overflow-hidden bg-slate-900">
+                    <img src="{{ url_for('static', filename='images/cherry.webp') }}" alt="Cherry Powdery Mildew" class="w-full h-full object-cover hover:scale-105 transition-transform duration-500">
+                    <span class="absolute top-3 right-3 bg-amber-500 text-white text-[10px] uppercase font-extrabold px-2.5 py-1 rounded-full shadow-md">Fungal</span>
+                    <span class="absolute bottom-3 left-3 bg-slate-900/80 backdrop-blur-md text-white text-[11px] font-bold px-2.5 py-1 rounded-lg border border-white/10">Cherry</span>
+                </div>
+                <div class="p-5 sm:p-6 flex-grow flex flex-col justify-between space-y-3">
+                    <div>
+                        <h3 class="disease-title text-sm sm:text-base font-extrabold text-slate-900 mb-1">Cherry Powdery Mildew</h3>
+                        <p class="text-[11px] sm:text-xs text-brand-600 font-bold mb-2">Podosphaera clandestina</p>
+                        <p class="text-xs text-slate-600 leading-relaxed">White powdery fungal patches developing on young leaves, causing curling and distortion.</p>
+                    </div>
+                    <div class="pt-3 border-t border-slate-100">
+                        <span class="text-[10px] font-bold text-slate-400 uppercase block mb-1">Cure Plan</span>
+                        <p class="text-xs text-slate-700 font-medium">Apply sulfur-based fungicides or potassium bicarbonate.</p>
+                    </div>
+                </div>
+            </div>
+
+            <div class="disease-card bg-white rounded-2xl sm:rounded-3xl shadow-lg shadow-slate-200/50 border border-slate-100 overflow-hidden flex flex-col hover:shadow-xl transition-all">
+                <div class="h-40 sm:h-48 relative overflow-hidden bg-slate-900">
+                    <img src="{{ url_for('static', filename='images/peach.webp') }}" alt="Peach Bacterial Spot" class="w-full h-full object-cover hover:scale-105 transition-transform duration-500">
+                    <span class="absolute top-3 right-3 bg-amber-500 text-white text-[10px] uppercase font-extrabold px-2.5 py-1 rounded-full shadow-md">Bacterial</span>
+                    <span class="absolute bottom-3 left-3 bg-slate-900/80 backdrop-blur-md text-white text-[11px] font-bold px-2.5 py-1 rounded-lg border border-white/10">Peach</span>
+                </div>
+                <div class="p-5 sm:p-6 flex-grow flex flex-col justify-between space-y-3">
+                    <div>
+                        <h3 class="disease-title text-sm sm:text-base font-extrabold text-slate-900 mb-1">Peach Bacterial Spot</h3>
+                        <p class="text-[11px] sm:text-xs text-brand-600 font-bold mb-2">Xanthomonas arboricola</p>
+                        <p class="text-xs text-slate-600 leading-relaxed">Angular purple-brown spots on leaves resulting in shot-hole appearance as tissue drops out.</p>
+                    </div>
+                    <div class="pt-3 border-t border-slate-100">
+                        <span class="text-[10px] font-bold text-slate-400 uppercase block mb-1">Cure Plan</span>
+                        <p class="text-xs text-slate-700 font-medium">Plant resistant cultivars; apply dormant copper sprays.</p>
+                    </div>
+                </div>
+            </div>
+
+            <div class="disease-card bg-white rounded-2xl sm:rounded-3xl shadow-lg shadow-slate-200/50 border border-slate-100 overflow-hidden flex flex-col hover:shadow-xl transition-all">
+                <div class="h-40 sm:h-48 relative overflow-hidden bg-slate-900">
+                    <img src="{{ url_for('static', filename='images/tomatoy.webp') }}" alt="Tomato Yellow Leaf Curl" class="w-full h-full object-cover hover:scale-105 transition-transform duration-500">
+                    <span class="absolute top-3 right-3 bg-amber-500 text-white text-[10px] uppercase font-extrabold px-2.5 py-1 rounded-full shadow-md">Viral</span>
+                    <span class="absolute bottom-3 left-3 bg-slate-900/80 backdrop-blur-md text-white text-[11px] font-bold px-2.5 py-1 rounded-lg border border-white/10">Tomato</span>
+                </div>
+                <div class="p-5 sm:p-6 flex-grow flex flex-col justify-between space-y-3">
+                    <div>
+                        <h3 class="disease-title text-sm sm:text-base font-extrabold text-slate-900 mb-1">Tomato Yellow Leaf Curl</h3>
+                        <p class="text-[11px] sm:text-xs text-brand-600 font-bold mb-2">Begomovirus (Whitefly-borne)</p>
+                        <p class="text-xs text-slate-600 leading-relaxed">Severe upward cupping of leaves, yellow margins, and stunted plant growth.</p>
+                    </div>
+                    <div class="pt-3 border-t border-slate-100">
+                        <span class="text-[10px] font-bold text-slate-400 uppercase block mb-1">Cure Plan</span>
+                        <p class="text-xs text-slate-700 font-medium">Control whiteflies using sticky traps and insecticidal soaps.</p>
+                    </div>
+                </div>
+            </div>
+
+        </div>
+
+        <div id="noResults" class="hidden text-center py-12">
+            <i class="fa-solid fa-magnifying-glass text-4xl text-slate-300 mb-3"></i>
+            <p class="text-slate-500 text-sm">No diseases match your search.</p>
+        </div>
+    </main>
+
+    <footer class="bg-white border-t border-slate-200/80 py-6 sm:py-8 text-center text-xs sm:text-sm text-slate-500 mt-10 sm:mt-16">
+        <p>&copy; 2026 PlantCare AI. All rights reserved.</p>
+    </footer>
+
+    <script>
+        function filterDiseases() {
+            const input = document.getElementById('searchInput').value.toLowerCase().trim();
+            const cards = document.querySelectorAll('.disease-card');
+            const noResults = document.getElementById('noResults');
+            const countEl = document.getElementById('diseaseCount');
+            let visible = 0;
+
+            cards.forEach(card => {
+                const title = card.querySelector('.disease-title').innerText.toLowerCase();
+                const match = !input || title.includes(input);
+                card.style.display = match ? 'flex' : 'none';
+                if (match) visible++;
+            });
+
+            noResults.classList.toggle('hidden', visible > 0);
+            if (countEl) countEl.textContent = `${visible} result${visible !== 1 ? 's' : ''}`;
+        }
+    </script>
+</body>
+</html>

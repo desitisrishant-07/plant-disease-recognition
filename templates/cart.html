@@ -1,0 +1,61 @@
+<!DOCTYPE html>
+<html lang="en" class="scroll-smooth">
+<head>
+    <meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Cart — PlantCare AI</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <script>tailwind.config={theme:{extend:{colors:{brand:{50:'#ecfdf5',100:'#d1fae5',200:'#a7f3d0',500:'#10b981',600:'#059669',700:'#047857',800:'#065f46',900:'#064e3b'}}}}}</script>
+</head>
+<body class="bg-gradient-to-br from-slate-50 via-emerald-50/20 to-teal-50/40 min-h-screen text-slate-800 flex flex-col font-sans antialiased">
+    {% include 'partials/header.html' %}
+
+    <main class="flex-grow max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 py-10 w-full">
+        <h2 class="text-3xl font-extrabold text-slate-900 mb-6">Shopping Cart</h2>
+
+        {% if items %}
+        <div class="bg-white rounded-3xl shadow-lg border border-slate-100 overflow-hidden">
+            <div class="divide-y divide-slate-100">
+                {% for it in items %}
+                <div class="p-4 sm:p-5 flex flex-col sm:flex-row sm:items-center gap-4">
+                    <div class="w-16 h-16 rounded-2xl bg-brand-50 text-brand-600 flex items-center justify-center text-2xl flex-shrink-0">
+                        <i class="fa-solid fa-prescription-bottle-medical"></i>
+                    </div>
+                    <div class="flex-grow">
+                        <h4 class="font-extrabold text-slate-900 text-sm">{{ it.product.name }}</h4>
+                        <p class="text-xs text-slate-500">{{ it.product.category }} · ₹{{ '%.2f'|format(it.product.price) }} each</p>
+                    </div>
+                    <form action="/cart/update/{{ it.product.id }}" method="POST" class="flex items-center gap-2">
+                        <input type="number" name="quantity" value="{{ it.qty }}" min="1" class="w-16 text-center py-2 rounded-lg border border-slate-200 text-sm">
+                        <button type="submit" class="bg-slate-100 hover:bg-slate-200 text-slate-700 text-xs font-bold px-3 py-2 rounded-lg">Update</button>
+                    </form>
+                    <span class="text-brand-700 font-black w-24 text-right">₹{{ '%.2f'|format(it.subtotal) }}</span>
+                    <form action="/cart/remove/{{ it.product.id }}" method="POST">
+                        <button class="text-rose-500 hover:text-rose-700 p-2"><i class="fa-solid fa-trash"></i></button>
+                    </form>
+                </div>
+                {% endfor %}
+            </div>
+            <div class="p-5 bg-slate-50 flex flex-col sm:flex-row items-center justify-between gap-4 border-t border-slate-200">
+                <div class="text-lg font-extrabold text-slate-900">Total: <span class="text-brand-700">₹{{ '%.2f'|format(total) }}</span></div>
+                <form action="/checkout" method="POST">
+                    <button type="submit" class="bg-gradient-to-r from-brand-600 to-teal-600 hover:from-brand-700 hover:to-teal-700 text-white font-bold px-8 py-3 rounded-xl shadow-lg text-sm uppercase tracking-wider">
+                        Checkout <i class="fa-solid fa-arrow-right ml-2"></i>
+                    </button>
+                </form>
+            </div>
+        </div>
+        {% else %}
+        <div class="text-center bg-white rounded-3xl border border-slate-100 p-12 shadow-sm">
+            <i class="fa-solid fa-cart-shopping text-4xl text-slate-300 mb-3"></i>
+            <p class="text-slate-500 mb-5">Your cart is empty.</p>
+            <a href="/shop" class="inline-flex items-center gap-2 bg-brand-600 hover:bg-brand-700 text-white font-bold px-6 py-3 rounded-2xl text-sm">
+                <i class="fa-solid fa-store"></i> Visit Shop
+            </a>
+        </div>
+        {% endif %}
+    </main>
+
+    <footer class="bg-white border-t border-slate-200/80 py-6 text-center text-sm text-slate-500">&copy; 2026 PlantCare AI.</footer>
+</body>
+</html>

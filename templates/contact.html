@@ -1,0 +1,105 @@
+<!DOCTYPE html>
+<html lang="en" class="scroll-smooth">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Contact Support — PlantCare AI</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <script>tailwind.config={theme:{extend:{colors:{brand:{50:'#ecfdf5',100:'#d1fae5',200:'#a7f3d0',500:'#10b981',600:'#059669',700:'#047857',800:'#065f46',900:'#064e3b'}}}}}</script>
+</head>
+<body class="bg-gradient-to-br from-slate-50 via-emerald-50/20 to-teal-50/40 min-h-screen text-slate-800 flex flex-col font-sans antialiased">
+
+    {% include 'partials/header.html' %}
+
+    <main class="flex-grow max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-10 sm:py-12 w-full">
+        <div class="text-center max-w-2xl mx-auto mb-8 sm:mb-12">
+            <span class="inline-flex items-center gap-2 bg-brand-100 text-brand-800 text-[10px] sm:text-xs font-bold px-3 sm:px-3.5 py-1.5 rounded-full uppercase tracking-wider mb-3 shadow-sm">
+                <i class="fa-solid fa-headset text-brand-600"></i> Get in Touch with Experts
+            </span>
+            <h2 class="text-2xl sm:text-4xl font-extrabold text-slate-900 mb-2 sm:mb-3">Contact Support & Agronomists</h2>
+            <p class="text-slate-600 text-sm sm:text-base leading-relaxed px-2">
+                Have questions about a complex crop disease or need technical assistance with our AI scanner? Drop us a message below.
+            </p>
+        </div>
+
+        <div class="grid grid-cols-1 lg:grid-cols-12 gap-6 sm:gap-8 items-start max-w-5xl mx-auto">
+
+            <div class="lg:col-span-5 bg-white rounded-2xl sm:rounded-3xl p-5 sm:p-8 shadow-xl shadow-slate-200/50 border border-slate-100 space-y-5 sm:space-y-6">
+                <h3 class="text-lg sm:text-xl font-bold text-slate-900">Contact Information</h3>
+
+                <div class="flex items-start gap-3 sm:gap-4">
+                    <div class="w-10 h-10 sm:w-12 sm:h-12 rounded-2xl bg-brand-50 text-brand-600 flex items-center justify-center text-base sm:text-lg flex-shrink-0">
+                        <i class="fa-solid fa-envelope"></i>
+                    </div>
+                    <div class="min-w-0">
+                        <span class="text-[10px] sm:text-xs font-bold text-slate-400 uppercase tracking-wider block">Email Support</span>
+                        <span class="text-xs sm:text-sm font-semibold text-slate-700 break-all">support@plantcareai.com</span>
+                    </div>
+                </div>
+
+                <div class="flex items-start gap-3 sm:gap-4">
+                    <div class="w-10 h-10 sm:w-12 sm:h-12 rounded-2xl bg-brand-50 text-brand-600 flex items-center justify-center text-base sm:text-lg flex-shrink-0">
+                        <i class="fa-solid fa-phone-volume"></i>
+                    </div>
+                    <div class="min-w-0">
+                        <span class="text-[10px] sm:text-xs font-bold text-slate-400 uppercase tracking-wider block">Helpline Number</span>
+                        <span class="text-xs sm:text-sm font-semibold text-slate-700">+1 (800) 555-PLANT</span>
+                    </div>
+                </div>
+
+                <div class="flex items-start gap-3 sm:gap-4">
+                    <div class="w-10 h-10 sm:w-12 sm:h-12 rounded-2xl bg-brand-50 text-brand-600 flex items-center justify-center text-base sm:text-lg flex-shrink-0">
+                        <i class="fa-solid fa-location-dot"></i>
+                    </div>
+                    <div class="min-w-0">
+                        <span class="text-[10px] sm:text-xs font-bold text-slate-400 uppercase tracking-wider block">Research Lab</span>
+                        <span class="text-xs sm:text-sm font-semibold text-slate-700">AgriTech Innovation Center, Suite 400</span>
+                    </div>
+                </div>
+            </div>
+
+            <div class="lg:col-span-7 bg-white rounded-2xl sm:rounded-3xl p-5 sm:p-8 shadow-xl shadow-slate-200/50 border border-slate-100">
+
+                {% if success %}
+                <div class="mb-5 sm:mb-6 p-3.5 sm:p-4 bg-emerald-50 border border-emerald-200 text-emerald-800 rounded-2xl text-xs sm:text-sm font-semibold flex items-center gap-2.5">
+                    <i class="fa-solid fa-circle-check text-brand-600 text-base sm:text-lg flex-shrink-0"></i>
+                    <span>Thank you! Your message has been successfully sent to the plants expert.</span>
+                </div>
+                {% endif %}
+
+                <form action="/contact" method="POST" class="space-y-4 sm:space-y-6">
+                    <div class="grid grid-cols-1 sm:grid-cols-2 gap-4 sm:gap-6">
+                        <div class="space-y-1.5 sm:space-y-2">
+                            <label class="text-[10px] sm:text-xs font-bold text-slate-500 uppercase tracking-wider">Your Name</label>
+                            <input type="text" name="name" required placeholder="John Doe" class="w-full px-3.5 sm:px-4 py-3 rounded-xl border border-slate-200 bg-slate-50/50 focus:outline-none focus:ring-2 focus:ring-brand-500 focus:bg-white text-sm min-h-[44px]">
+                        </div>
+                        <div class="space-y-1.5 sm:space-y-2">
+                            <label class="text-[10px] sm:text-xs font-bold text-slate-500 uppercase tracking-wider">Email Address</label>
+                            <input type="email" name="email" required placeholder="john@example.com" class="w-full px-3.5 sm:px-4 py-3 rounded-xl border border-slate-200 bg-slate-50/50 focus:outline-none focus:ring-2 focus:ring-brand-500 focus:bg-white text-sm min-h-[44px]">
+                        </div>
+                    </div>
+
+                    <div class="space-y-1.5 sm:space-y-2">
+                        <label class="text-[10px] sm:text-xs font-bold text-slate-500 uppercase tracking-wider">Subject / Crop Issue</label>
+                        <input type="text" name="subject" required placeholder="e.g. Tomato Blight Consultation" class="w-full px-3.5 sm:px-4 py-3 rounded-xl border border-slate-200 bg-slate-50/50 focus:outline-none focus:ring-2 focus:ring-brand-500 focus:bg-white text-sm min-h-[44px]">
+                    </div>
+
+                    <div class="space-y-1.5 sm:space-y-2">
+                        <label class="text-[10px] sm:text-xs font-bold text-slate-500 uppercase tracking-wider">Message</label>
+                        <textarea rows="4" name="message" required placeholder="Describe your crop condition or inquiry..." class="w-full px-3.5 sm:px-4 py-3 rounded-xl border border-slate-200 bg-slate-50/50 focus:outline-none focus:ring-2 focus:ring-brand-500 focus:bg-white text-sm resize-none"></textarea>
+                    </div>
+
+                    <button type="submit" class="w-full bg-gradient-to-r from-brand-600 to-teal-600 text-white font-bold py-3.5 px-6 rounded-xl shadow-lg hover:from-brand-700 hover:to-teal-700 transition-colors text-sm uppercase tracking-wider min-h-[48px]">
+                        Send Message <i class="fa-solid fa-paper-plane ml-2"></i>
+                    </button>
+                </form>
+            </div>
+        </div>
+    </main>
+
+    <footer class="bg-white border-t border-slate-200/80 py-6 sm:py-8 text-center text-xs sm:text-sm text-slate-500 mt-10 sm:mt-16">
+        <p>&copy; 2026 PlantCare AI. All rights reserved.</p>
+    </footer>
+</body>
+</html>

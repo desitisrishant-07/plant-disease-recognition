@@ -1,0 +1,155 @@
+<!DOCTYPE html>
+<html lang="en" class="scroll-smooth">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>About — PlantCare AI</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <script>tailwind.config={theme:{extend:{colors:{brand:{50:'#ecfdf5',100:'#d1fae5',200:'#a7f3d0',500:'#10b981',600:'#059669',700:'#047857',800:'#065f46',900:'#064e3b'}}}}}</script>
+</head>
+<body class="bg-gradient-to-br from-slate-50 via-emerald-50/20 to-teal-50/40 min-h-screen text-slate-800 flex flex-col font-sans antialiased">
+
+    {% include 'partials/header.html' %}
+
+    <main class="flex-grow max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-10 sm:py-12 w-full space-y-10 sm:space-y-16">
+
+        <div class="text-center max-w-3xl mx-auto space-y-3 sm:space-y-4">
+            <span class="inline-flex items-center gap-2 bg-brand-100 text-brand-800 text-[10px] sm:text-xs font-bold px-3 sm:px-3.5 py-1.5 rounded-full uppercase tracking-wider shadow-xs">
+                <i class="fa-solid fa-shield-halved text-brand-600"></i> Smart Agriculture Solution
+            </span>
+            <h2 class="text-2xl sm:text-4xl lg:text-5xl font-extrabold text-slate-900 tracking-tight leading-tight">
+                Automated Plant Leaf <span class="bg-gradient-to-r from-brand-600 to-emerald-500 bg-clip-text text-transparent">Disease Detection System</span>
+            </h2>
+            <p class="text-sm sm:text-base lg:text-lg text-slate-600 leading-relaxed">
+                Empowering farmers, researchers, and botanists with cutting-edge Deep Learning algorithms to diagnose crop infections instantly using leaf photography.
+            </p>
+
+            <!-- ═══════════════════════════════════════════════ -->
+            <!-- CTA BUTTONS — guest sees lock + login redirect -->
+            <!-- ═══════════════════════════════════════════════ -->
+            {% if session.get('user_id') %}
+                {# ── Logged-in: direct links ── #}
+                <div class="flex flex-col sm:flex-row items-center justify-center gap-3 pt-4">
+                    <a href="/detect" class="w-full sm:w-auto inline-flex items-center justify-center gap-2 bg-gradient-to-r from-brand-600 to-emerald-600 text-white font-bold px-6 py-3.5 rounded-2xl shadow-xl shadow-brand-600/25 hover:from-brand-700 hover:to-emerald-700 hover:shadow-brand-600/40 transition-all text-xs sm:text-sm uppercase tracking-wider min-h-[48px]">
+                        <i class="fa-solid fa-camera"></i> Start Diagnosis Now
+                    </a>
+                    <a href="/diseases" class="w-full sm:w-auto inline-flex items-center justify-center gap-2 bg-white border-2 border-slate-200 text-slate-700 font-bold px-6 py-3.5 rounded-2xl hover:border-brand-400 hover:text-brand-700 hover:bg-brand-50 transition-all text-xs sm:text-sm uppercase tracking-wider min-h-[48px]">
+                        <i class="fa-solid fa-book-medical"></i> Browse Disease Catalog
+                    </a>
+                    <a href="/tips" class="w-full sm:w-auto inline-flex items-center justify-center gap-2 bg-white border-2 border-slate-200 text-slate-700 font-bold px-6 py-3.5 rounded-2xl hover:border-amber-400 hover:text-amber-700 hover:bg-amber-50 transition-all text-xs sm:text-sm uppercase tracking-wider min-h-[48px]">
+                        <i class="fa-solid fa-shield-virus"></i> Prevention Tips
+                    </a>
+                </div>
+            {% else %}
+                {# ── Guest: lock icons + redirect to login with next param ── #}
+                <div class="flex flex-col sm:flex-row items-center justify-center gap-3 pt-4">
+                    <a href="{{ url_for('login', next='/detect') }}" class="w-full sm:w-auto inline-flex items-center justify-center gap-2 bg-gradient-to-r from-brand-600 to-emerald-600 text-white font-bold px-6 py-3.5 rounded-2xl shadow-xl shadow-brand-600/25 hover:from-brand-700 hover:to-emerald-700 hover:shadow-brand-600/40 transition-all text-xs sm:text-sm uppercase tracking-wider min-h-[48px]">
+                        <i class="fa-solid fa-lock"></i> Start Diagnosis Now
+                    </a>
+                    <a href="{{ url_for('login', next='/diseases') }}" class="w-full sm:w-auto inline-flex items-center justify-center gap-2 bg-white border-2 border-slate-200 text-slate-700 font-bold px-6 py-3.5 rounded-2xl hover:border-brand-400 hover:text-brand-700 hover:bg-brand-50 transition-all text-xs sm:text-sm uppercase tracking-wider min-h-[48px]">
+                        <i class="fa-solid fa-lock text-slate-500"></i> Browse Disease Catalog
+                    </a>
+                    <a href="{{ url_for('login', next='/tips') }}" class="w-full sm:w-auto inline-flex items-center justify-center gap-2 bg-white border-2 border-slate-200 text-slate-700 font-bold px-6 py-3.5 rounded-2xl hover:border-amber-400 hover:text-amber-700 hover:bg-amber-50 transition-all text-xs sm:text-sm uppercase tracking-wider min-h-[48px]">
+                        <i class="fa-solid fa-lock text-slate-500"></i> Prevention Tips
+                    </a>
+                </div>
+
+                {# ── Hint text below buttons for guests ── #}
+                <p class="text-xs sm:text-sm text-slate-500 flex items-center justify-center gap-1.5 pt-2">
+                    <i class="fa-solid fa-circle-info text-brand-600"></i>
+                    <span>Login required — click any button to sign in and continue</span>
+                </p>
+            {% endif %}
+        </div>
+
+        <!-- Objective cards -->
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-5 sm:gap-8">
+            <div class="bg-white rounded-2xl sm:rounded-3xl p-6 sm:p-8 shadow-xl shadow-slate-200/50 border border-slate-100">
+                <div class="w-12 h-12 sm:w-14 sm:h-14 rounded-2xl bg-brand-50 text-brand-600 flex items-center justify-center text-xl sm:text-2xl mb-5 sm:mb-6 font-bold shadow-xs">
+                    <i class="fa-solid fa-bullseye"></i>
+                </div>
+                <h3 class="text-lg sm:text-xl font-bold text-slate-900 mb-2">Accurate Identification</h3>
+                <p class="text-sm text-slate-600 leading-relaxed">
+                    This tool uses a trained neural network made with TensorFlow to analyze leaves. It identifies more than 39 different problems by spotting unusual colors, textures, or spots.
+                </p>
+            </div>
+
+            <div class="bg-white rounded-2xl sm:rounded-3xl p-6 sm:p-8 shadow-xl shadow-slate-200/50 border border-slate-100">
+                <div class="w-12 h-12 sm:w-14 sm:h-14 rounded-2xl bg-brand-50 text-brand-600 flex items-center justify-center text-xl sm:text-2xl mb-5 sm:mb-6 font-bold shadow-xs">
+                    <i class="fa-solid fa-bolt"></i>
+                </div>
+                <h3 class="text-lg sm:text-xl font-bold text-slate-900 mb-2">Real-time Analysis</h3>
+                <p class="text-sm text-slate-600 leading-relaxed">
+                    Upload any leaf snapshot through our Flask web interface to get immediate classification results, pathogen details, and immediate remediation steps.
+                </p>
+            </div>
+
+            <div class="bg-white rounded-2xl sm:rounded-3xl p-6 sm:p-8 shadow-xl shadow-slate-200/50 border border-slate-100">
+                <div class="w-12 h-12 sm:w-14 sm:h-14 rounded-2xl bg-brand-50 text-brand-600 flex items-center justify-center text-xl sm:text-2xl mb-5 sm:mb-6 font-bold shadow-xs">
+                    <i class="fa-solid fa-seedling"></i>
+                </div>
+                <h3 class="text-lg sm:text-xl font-bold text-slate-900 mb-2">Crop Protection</h3>
+                <p class="text-sm text-slate-600 leading-relaxed">
+                    Prevent widespread crop failure by recognizing early signs of fungal, bacterial, and viral blights before they damage your harvest.
+                </p>
+            </div>
+        </div>
+
+        <!-- Pipeline -->
+        <div class="bg-white rounded-2xl sm:rounded-3xl shadow-2xl shadow-slate-200/60 border border-slate-100 p-6 sm:p-10 lg:p-12">
+            <div class="text-center max-w-2xl mx-auto mb-8 sm:mb-12">
+                <h3 class="text-xl sm:text-3xl font-extrabold text-slate-900 mb-2">How Our Detection Pipeline Works</h3>
+                <p class="text-slate-500 text-xs sm:text-sm">Four simple steps from leaf capture to expert treatment recommendation.</p>
+            </div>
+
+            <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-4 sm:gap-6">
+                <div class="bg-slate-50/80 rounded-2xl p-5 sm:p-6 border border-slate-100 text-center">
+                    <div class="w-11 h-11 sm:w-12 sm:h-12 rounded-full bg-brand-600 text-white font-black flex items-center justify-center text-base sm:text-lg mb-3 sm:mb-4 shadow-md mx-auto">1</div>
+                    <h4 class="font-bold text-slate-900 mb-1 text-sm sm:text-base">Image Upload</h4>
+                    <p class="text-xs text-slate-600">Capture or upload a clear photo of an infected plant leaf via the portal.</p>
+                </div>
+                <div class="bg-slate-50/80 rounded-2xl p-5 sm:p-6 border border-slate-100 text-center">
+                    <div class="w-11 h-11 sm:w-12 sm:h-12 rounded-full bg-brand-600 text-white font-black flex items-center justify-center text-base sm:text-lg mb-3 sm:mb-4 shadow-md mx-auto">2</div>
+                    <h4 class="font-bold text-slate-900 mb-1 text-sm sm:text-base">Preprocessing</h4>
+                    <p class="text-xs text-slate-600">The application resizes and normalizes the image tensor for the model.</p>
+                </div>
+                <div class="bg-slate-50/80 rounded-2xl p-5 sm:p-6 border border-slate-100 text-center">
+                    <div class="w-11 h-11 sm:w-12 sm:h-12 rounded-full bg-brand-600 text-white font-black flex items-center justify-center text-base sm:text-lg mb-3 sm:mb-4 shadow-md mx-auto">3</div>
+                    <h4 class="font-bold text-slate-900 mb-1 text-sm sm:text-base">AI Classification</h4>
+                    <p class="text-xs text-slate-600">TensorFlow evaluates leaf patterns and maps them to JSON disease records.</p>
+                </div>
+                <div class="bg-slate-50/80 rounded-2xl p-5 sm:p-6 border border-slate-100 text-center">
+                    <div class="w-11 h-11 sm:w-12 sm:h-12 rounded-full bg-brand-600 text-white font-black flex items-center justify-center text-base sm:text-lg mb-3 sm:mb-4 shadow-md mx-auto">4</div>
+                    <h4 class="font-bold text-slate-900 mb-1 text-sm sm:text-base">Cure Plan</h4>
+                    <p class="text-xs text-slate-600">Get instant diagnostic reports along with precise treatment measures.</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- Bottom CTA Banner -->
+        <div class="bg-gradient-to-r from-brand-700 via-brand-600 to-teal-600 rounded-2xl sm:rounded-3xl p-6 sm:p-10 lg:p-12 text-white text-center shadow-2xl relative overflow-hidden">
+            <div class="absolute -right-10 -bottom-10 w-40 sm:w-60 h-40 sm:h-60 bg-white/10 rounded-full blur-2xl pointer-events-none"></div>
+            <h3 class="text-xl sm:text-3xl lg:text-4xl font-extrabold mb-3 sm:mb-4 relative">Ready to Inspect Your Crops?</h3>
+            <p class="text-emerald-100 max-w-xl mx-auto text-sm sm:text-base mb-6 sm:mb-8 leading-relaxed relative px-2">
+                Try out our live diagnostic scanner right now. Upload a leaf picture and check its health status in seconds.
+            </p>
+
+            {% if session.get('user_id') %}
+                <a href="/detect" class="inline-flex items-center gap-2 bg-white text-brand-800 font-extrabold px-6 sm:px-8 py-3.5 sm:py-4 rounded-2xl shadow-lg hover:bg-emerald-50 transition-colors text-xs sm:text-sm uppercase tracking-wider relative min-h-[48px]">
+                    Start Leaf Diagnosis Now <i class="fa-solid fa-arrow-right"></i>
+                </a>
+            {% else %}
+                <a href="{{ url_for('login', next='/detect') }}" class="inline-flex items-center gap-2 bg-white text-brand-800 font-extrabold px-6 sm:px-8 py-3.5 sm:py-4 rounded-2xl shadow-lg hover:bg-emerald-50 transition-colors text-xs sm:text-sm uppercase tracking-wider relative min-h-[48px]">
+                    <i class="fa-solid fa-lock"></i> Login to Start Diagnosis <i class="fa-solid fa-arrow-right"></i>
+                </a>
+            {% endif %}
+        </div>
+
+    </main>
+
+    <footer class="bg-white border-t border-slate-200/80 py-6 sm:py-8 text-center text-xs sm:text-sm text-slate-500 mt-10 sm:mt-16">
+        <p>&copy; 2026 PlantCare AI. All rights reserved.</p>
+    </footer>
+</body>
+</html>

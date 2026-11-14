@@ -1,0 +1,579 @@
+<!DOCTYPE html>
+<html lang="en" class="scroll-smooth">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>PlantCare AI — Advanced Plant Disease Diagnosis</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: { brand: { 50:'#ecfdf5',100:'#d1fae5',200:'#a7f3d0',500:'#10b981',600:'#059669',700:'#047857',800:'#065f46',900:'#064e3b' } },
+                    animation: {
+                        'float': 'float 6s ease-in-out infinite',
+                        'float-slow': 'float 9s ease-in-out infinite',
+                        'fade-in-up': 'fadeInUp 0.6s ease-out',
+                        'pulse-soft': 'pulseSoft 3s ease-in-out infinite',
+                    },
+                    keyframes: {
+                        float: { '0%, 100%': { transform: 'translateY(0px)' }, '50%': { transform: 'translateY(-20px)' } },
+                        fadeInUp: { 'from': { opacity: '0', transform: 'translateY(20px)' }, 'to': { opacity: '1', transform: 'translateY(0)' } },
+                        pulseSoft: { '0%, 100%': { opacity: '0.6' }, '50%': { opacity: '1' } },
+                    }
+                }
+            }
+        }
+    </script>
+</head>
+<body class="bg-slate-50 min-h-screen text-slate-800 flex flex-col font-sans antialiased selection:bg-brand-500 selection:text-white relative overflow-x-hidden">
+
+    <!-- ═══════════ Decorative Background Blobs ═══════════ -->
+    <div class="fixed inset-0 -z-10 pointer-events-none overflow-hidden">
+        <div class="absolute top-0 left-1/4 w-96 h-96 bg-brand-300/30 rounded-full blur-3xl animate-float"></div>
+        <div class="absolute top-1/3 right-0 w-96 h-96 bg-emerald-300/30 rounded-full blur-3xl animate-float-slow"></div>
+        <div class="absolute bottom-0 left-0 w-96 h-96 bg-teal-300/20 rounded-full blur-3xl animate-float"></div>
+    </div>
+
+    <!-- ═══════════ Loading Overlay ═══════════ -->
+    <div id="loadingOverlay" class="fixed inset-0 bg-slate-950/70 backdrop-blur-lg z-50 hidden items-center justify-center text-white px-4">
+        <div class="text-center">
+            <div class="relative inline-block">
+                <div class="absolute inset-0 bg-brand-500 rounded-full blur-2xl opacity-50"></div>
+                <div class="relative w-24 h-24 rounded-full border-4 border-brand-500/30 border-t-brand-400 animate-spin"></div>
+                <div class="absolute inset-0 flex items-center justify-center text-brand-400">
+                    <i class="fa-solid fa-seedling animate-pulse text-2xl"></i>
+                </div>
+            </div>
+            <h3 class="text-xl font-bold mt-8 tracking-wide">Analyzing Your Plant...</h3>
+            <p class="text-sm text-slate-300 mt-2 max-w-xs mx-auto">Our neural network is examining leaf patterns</p>
+        </div>
+    </div>
+
+    {% include 'partials/header.html' %}
+
+    <!-- ═══════════ Main Content ═══════════ -->
+    <main class="flex-grow max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 sm:py-12 w-full">
+
+        <!-- ─────── Hero ─────── -->
+        <div class="text-center max-w-3xl mx-auto mb-10 sm:mb-14">
+            <div class="inline-flex items-center gap-2 bg-white/60 backdrop-blur border border-brand-200 text-brand-800 text-[10px] sm:text-xs font-bold px-4 py-2 rounded-full uppercase tracking-wider mb-5 shadow-lg shadow-brand-100/50">
+                <span class="flex h-2 w-2 relative">
+                    <span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-brand-500 opacity-75"></span>
+                    <span class="relative inline-flex rounded-full h-2 w-2 bg-brand-600"></span>
+                </span>
+                AI-Powered Plant Health Scanner
+            </div>
+            <h1 class="text-3xl sm:text-5xl lg:text-6xl font-black text-slate-900 tracking-tight mb-4 leading-tight">
+                Diagnose Plant<br>
+                <span class="bg-gradient-to-r from-brand-600 via-emerald-500 to-teal-500 bg-clip-text text-transparent">Diseases in Seconds</span>
+            </h1>
+            <p class="text-sm sm:text-base lg:text-lg text-slate-600 leading-relaxed max-w-2xl mx-auto">
+                Upload a leaf photo and get instant AI analysis with detailed disease information, treatment plans, and prevention tips — all in under 3 seconds.
+            </p>
+        </div>
+
+        <!-- ─────── Two Column Layout ─────── -->
+        <div class="grid grid-cols-1 lg:grid-cols-12 gap-6 sm:gap-8 items-start">
+
+            <!-- ═══ Upload Column ═══ -->
+            <div class="lg:col-span-5 lg:sticky lg:top-24">
+                <div class="relative">
+                    <div class="absolute -inset-1 bg-gradient-to-r from-brand-500 to-emerald-500 rounded-3xl blur-xl opacity-20"></div>
+
+                    <div class="relative bg-white rounded-3xl shadow-2xl border border-slate-100 p-6 sm:p-8">
+                        <div class="flex items-center justify-between mb-6">
+                            <div class="flex items-center gap-3">
+                                <div class="w-11 h-11 rounded-2xl bg-gradient-to-br from-brand-500 to-emerald-600 text-white flex items-center justify-center shadow-lg shadow-brand-500/30">
+                                    <i class="fa-solid fa-cloud-arrow-up text-lg"></i>
+                                </div>
+                                <div>
+                                    <h3 class="text-lg font-extrabold text-slate-900 leading-tight">Upload Specimen</h3>
+                                    <p class="text-xs text-slate-500 font-medium">JPEG or PNG · Max 10MB</p>
+                                </div>
+                            </div>
+                        </div>
+
+                        <form action="/upload/" method="POST" enctype="multipart/form-data" class="space-y-5" id="uploadForm">
+                            <div class="group relative border-2 border-dashed border-slate-300 rounded-2xl p-6 text-center hover:border-brand-500 hover:bg-gradient-to-br hover:from-brand-50/50 hover:to-emerald-50/30 transition-all duration-300 bg-slate-50/50 cursor-pointer" id="dropZone">
+                                <input type="file" name="img" id="imgInput" accept="image/*" required class="absolute inset-0 opacity-0 cursor-pointer w-full h-full z-10">
+
+                                <div id="dropzonePrompt" class="flex flex-col items-center justify-center space-y-3 py-4">
+                                    <div class="relative">
+                                        <div class="absolute inset-0 bg-brand-400 rounded-2xl blur-xl opacity-0 group-hover:opacity-40 transition-opacity"></div>
+                                        <div class="relative w-16 h-16 rounded-2xl bg-gradient-to-br from-brand-100 to-emerald-100 text-brand-600 flex items-center justify-center text-2xl shadow-md border border-white">
+                                            <i class="fa-solid fa-camera-retro"></i>
+                                        </div>
+                                    </div>
+                                    <div>
+                                        <p class="text-sm font-bold text-slate-800">Click to browse <span class="font-normal text-slate-500">or drag & drop</span></p>
+                                        <p class="text-xs text-slate-400 mt-1">High-res leaf photos work best</p>
+                                    </div>
+                                </div>
+
+                                <div id="previewContainer" class="hidden flex-col items-center justify-center space-y-3 py-2">
+                                    <div class="relative rounded-xl overflow-hidden shadow-md border border-slate-200 bg-slate-900 max-h-52 w-full flex items-center justify-center">
+                                        <img id="imagePreview" src="#" alt="Preview" class="max-h-52 object-contain w-full">
+                                    </div>
+                                    <p id="fileName" class="text-xs font-semibold text-slate-700 truncate max-w-full bg-white px-3 py-1 rounded-full border border-slate-200 shadow-sm"></p>
+                                </div>
+                            </div>
+
+                            <button type="submit" id="submitBtn" class="group relative w-full overflow-hidden bg-gradient-to-r from-brand-600 via-emerald-600 to-teal-600 text-white font-extrabold py-4 px-6 rounded-2xl shadow-xl shadow-brand-500/30 hover:shadow-2xl hover:shadow-brand-500/40 transition-all duration-300 flex items-center justify-center gap-3 text-sm sm:text-base min-h-[56px]">
+                                <span class="absolute inset-0 bg-gradient-to-r from-emerald-500 to-teal-500 opacity-0 group-hover:opacity-100 transition-opacity duration-300"></span>
+                                <span class="relative flex items-center gap-2.5">
+                                    <i class="fa-solid fa-microscope"></i>
+                                    <span class="tracking-wide uppercase">Analyze Plant Health</span>
+                                    <i class="fa-solid fa-arrow-right-long group-hover:translate-x-1 transition-transform"></i>
+                                </span>
+                            </button>
+                        </form>
+
+                        <div class="mt-6 pt-6 border-t border-slate-100">
+                            <div class="flex items-center gap-2 mb-3">
+                                <i class="fa-solid fa-lightbulb text-amber-500 text-xs"></i>
+                                <h4 class="text-xs font-bold text-slate-500 uppercase tracking-wider">Pro Tips</h4>
+                            </div>
+                            <ul class="space-y-2 text-xs text-slate-600">
+                                <li class="flex items-start gap-2">
+                                    <i class="fa-solid fa-circle-check text-brand-600 mt-0.5 flex-shrink-0"></i>
+                                    <span>Use natural daylight — avoid flash</span>
+                                </li>
+                                <li class="flex items-start gap-2">
+                                    <i class="fa-solid fa-circle-check text-brand-600 mt-0.5 flex-shrink-0"></i>
+                                    <span>Focus close-up on the infected area</span>
+                                </li>
+                                <li class="flex items-start gap-2">
+                                    <i class="fa-solid fa-circle-check text-brand-600 mt-0.5 flex-shrink-0"></i>
+                                    <span>Plain background gives best accuracy</span>
+                                </li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- ═══ Result Column ═══ -->
+            <div class="lg:col-span-7">
+                {% if result %}
+                <div class="space-y-5 animate-fade-in-up">
+
+                    <!-- ── Status Hero Banner (FIX 1: static classes) ── -->
+                    <div class="relative overflow-hidden rounded-3xl p-6 sm:p-7 text-white shadow-2xl
+                        {% if prediction.urgency == 'Act Now' %}bg-gradient-to-br from-rose-500 to-orange-600
+                        {% elif prediction.urgency == 'Treat This Week' %}bg-gradient-to-br from-amber-500 to-orange-600
+                        {% elif prediction.urgency == 'Monitor Closely' %}bg-gradient-to-br from-yellow-500 to-amber-600
+                        {% elif prediction.urgency == 'All Good' %}bg-gradient-to-br from-emerald-500 to-teal-600
+                        {% else %}bg-gradient-to-br from-slate-500 to-slate-700{% endif %}">
+                        <div class="absolute -right-12 -top-12 w-48 h-48 bg-white/10 rounded-full blur-3xl pointer-events-none"></div>
+                        <div class="absolute -left-8 -bottom-8 w-32 h-32 bg-white/10 rounded-full blur-2xl pointer-events-none"></div>
+
+                        <div class="relative flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
+                            <div class="flex items-start gap-4">
+                                <div class="w-14 h-14 rounded-2xl bg-white/25 backdrop-blur flex items-center justify-center flex-shrink-0 border border-white/40 shadow-lg">
+                                    <i class="fa-solid {% if prediction.is_healthy %}fa-circle-check{% elif prediction.is_background %}fa-camera{% else %}fa-triangle-exclamation{% endif %} text-2xl"></i>
+                                </div>
+                                <div>
+                                    <p class="text-[10px] font-black uppercase tracking-widest opacity-90 mb-1">Diagnosis Complete</p>
+                                    <h2 class="text-2xl sm:text-3xl font-black leading-tight">
+                                        {% if prediction.is_healthy %}Plant is Healthy! 🎉{% elif prediction.is_background %}No Plant Detected{% else %}{{ prediction.urgency }}{% endif %}
+                                    </h2>
+                                    <p class="text-sm opacity-90 mt-1.5 font-medium">
+                                        {{ prediction.plant }} · {{ prediction.disease_short }}
+                                    </p>
+                                </div>
+                            </div>
+                            <div class="flex items-center gap-2 px-3 py-2 bg-white/25 backdrop-blur rounded-full text-[10px] font-black uppercase tracking-wider border border-white/40">
+                                <i class="fa-solid fa-circle-check"></i>
+                                <span>AI Verified</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- ── Identity Card (FIX 2: data-pct for width) ── -->
+                    <div class="bg-white rounded-3xl shadow-xl border border-slate-100 p-6">
+                        <div class="grid grid-cols-1 md:grid-cols-5 gap-5 items-start">
+
+                            <div class="md:col-span-2">
+                                <label class="text-[10px] font-black text-slate-400 uppercase tracking-widest">Analyzed Specimen</label>
+                                <div class="mt-2 rounded-2xl overflow-hidden border border-slate-200 bg-slate-900 shadow-inner h-52 relative group">
+                                    <img src="{{ imagepath }}" alt="Uploaded Plant" class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500">
+                                    <div class="absolute bottom-2 left-2 bg-slate-900/80 backdrop-blur text-white text-[10px] font-bold px-2.5 py-1 rounded-lg border border-white/20">
+                                        <i class="fa-solid fa-image text-brand-400 mr-1"></i> Upload
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="md:col-span-3 space-y-4">
+                                <div>
+                                    <label class="text-[10px] font-black text-slate-400 uppercase tracking-widest">Plant</label>
+                                    <h4 class="text-lg font-black text-slate-900 flex items-center gap-2 mt-1">
+                                        <span class="w-8 h-8 rounded-xl bg-brand-100 text-brand-700 flex items-center justify-center text-sm"><i class="fa-solid fa-seedling"></i></span>
+                                        {{ prediction.plant }}
+                                    </h4>
+                                </div>
+
+                                <div>
+                                    <label class="text-[10px] font-black text-slate-400 uppercase tracking-widest">Condition</label>
+                                    <h4 class="text-lg font-black flex items-center gap-2 mt-1
+                                        {% if prediction.is_healthy %}text-emerald-700
+                                        {% elif prediction.is_background %}text-slate-700
+                                        {% else %}text-rose-700{% endif %}">
+                                        <span class="w-8 h-8 rounded-xl flex items-center justify-center text-sm
+                                            {% if prediction.is_healthy %}bg-emerald-100 text-emerald-700
+                                            {% elif prediction.is_background %}bg-slate-100 text-slate-600
+                                            {% else %}bg-rose-100 text-rose-700{% endif %}">
+                                            <i class="fa-solid {% if prediction.is_healthy %}fa-circle-check{% elif prediction.is_background %}fa-image{% else %}fa-virus{% endif %}"></i>
+                                        </span>
+                                        {{ prediction.disease_short }}
+                                    </h4>
+                                </div>
+
+                                <div class="flex flex-wrap items-center gap-2">
+                                    <span class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full text-[10px] font-black uppercase tracking-wider
+                                        {% if prediction.category_color == 'emerald' %}bg-emerald-100 text-emerald-800 border border-emerald-200
+                                        {% elif prediction.category_color == 'amber' %}bg-amber-100 text-amber-800 border border-amber-200
+                                        {% elif prediction.category_color == 'rose' %}bg-rose-100 text-rose-800 border border-rose-200
+                                        {% elif prediction.category_color == 'purple' %}bg-purple-100 text-purple-800 border border-purple-200
+                                        {% elif prediction.category_color == 'orange' %}bg-orange-100 text-orange-800 border border-orange-200
+                                        {% else %}bg-slate-100 text-slate-700 border border-slate-200{% endif %}">
+                                        <i class="fa-solid {{ prediction.category_icon }}"></i> {{ prediction.category }}
+                                    </span>
+                                    {% if not prediction.is_healthy and not prediction.is_background %}
+                                    <span class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full text-[10px] font-black uppercase tracking-wider
+                                        {% if prediction.spread_color == 'rose' %}bg-rose-100 text-rose-800 border border-rose-200
+                                        {% elif prediction.spread_color == 'amber' %}bg-amber-100 text-amber-800 border border-amber-200
+                                        {% else %}bg-emerald-100 text-emerald-800 border border-emerald-200{% endif %}">
+                                        <i class="fa-solid fa-share-nodes"></i> {{ prediction.spread_risk }} Spread
+                                    </span>
+                                    {% endif %}
+                                </div>
+
+                                {% if not prediction.is_healthy and not prediction.is_background %}
+                                <div>
+                                    <div class="flex items-center justify-between mb-1.5">
+                                        <span class="text-[10px] font-black text-slate-400 uppercase tracking-widest">Severity</span>
+                                        <span class="text-xs font-black
+                                            {% if prediction.severity == 'High' %}text-rose-600
+                                            {% elif prediction.severity == 'Medium' %}text-amber-600
+                                            {% else %}text-emerald-600{% endif %}">{{ prediction.severity }}</span>
+                                    </div>
+                                    <!-- FIX 2: data-pct attribute + JS sets width -->
+                                    <div class="h-2.5 bg-slate-100 rounded-full overflow-hidden">
+                                        <div class="risk-bar h-full rounded-full transition-all duration-700
+                                            {% if prediction.severity == 'High' %}bg-gradient-to-r from-rose-500 to-orange-500
+                                            {% elif prediction.severity == 'Medium' %}bg-gradient-to-r from-amber-400 to-orange-500
+                                            {% else %}bg-gradient-to-r from-emerald-400 to-teal-500{% endif %}"
+                                            data-pct="{{ prediction.risk_score }}"></div>
+                                    </div>
+                                </div>
+                                {% endif %}
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- ── Understanding the Disease ── -->
+                    <div class="bg-white rounded-3xl shadow-xl border border-slate-100 overflow-hidden">
+                        <div class="flex items-stretch">
+                            <div class="w-1 bg-gradient-to-b from-blue-400 to-blue-600"></div>
+                            <div class="flex-1 p-6 flex items-start gap-4">
+                                <div class="w-11 h-11 rounded-2xl bg-blue-100 text-blue-700 flex items-center justify-center flex-shrink-0">
+                                    <i class="fa-solid fa-book-open"></i>
+                                </div>
+                                <div class="min-w-0 flex-1">
+                                    <h5 class="text-sm font-black text-slate-900 mb-1.5">Understanding the Disease</h5>
+                                    <p class="text-sm text-slate-700 leading-relaxed">{{ prediction.understanding }}</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- ── Symptoms to Watch For (FIX 3: dot instead of text-[6px]) ── -->
+                    {% if prediction.symptoms %}
+                    <div class="bg-white rounded-3xl shadow-xl border border-slate-100 overflow-hidden">
+                        <div class="flex items-stretch">
+                            <div class="w-1 bg-gradient-to-b from-purple-400 to-purple-600"></div>
+                            <div class="flex-1 p-6">
+                                <div class="flex items-center gap-3 mb-3">
+                                    <div class="w-11 h-11 rounded-2xl bg-purple-100 text-purple-700 flex items-center justify-center flex-shrink-0">
+                                        <i class="fa-solid fa-magnifying-glass"></i>
+                                    </div>
+                                    <h5 class="text-sm font-black text-slate-900">Symptoms to Watch For</h5>
+                                </div>
+                                <ul class="grid grid-cols-1 sm:grid-cols-2 gap-2.5 ml-1">
+                                    {% for symptom in prediction.symptoms %}
+                                    <li class="flex items-start gap-2 text-xs text-slate-700 leading-relaxed bg-purple-50/50 rounded-xl px-3 py-2">
+                                        <span class="w-1.5 h-1.5 rounded-full bg-purple-500 mt-1.5 flex-shrink-0"></span>
+                                        <span>{{ symptom }}</span>
+                                    </li>
+                                    {% endfor %}
+                                </ul>
+                            </div>
+                        </div>
+                    </div>
+                    {% endif %}
+
+                    <!-- ── Action Timeline ── -->
+                    <div class="bg-white rounded-3xl shadow-xl border border-slate-100 p-6">
+                        <div class="flex items-center gap-3 mb-5">
+                            <div class="w-11 h-11 rounded-2xl bg-brand-100 text-brand-700 flex items-center justify-center flex-shrink-0">
+                                <i class="fa-solid fa-list-check"></i>
+                            </div>
+                            <div>
+                                <h5 class="text-sm font-black text-slate-900">Your Action Plan</h5>
+                                <p class="text-[11px] text-slate-500">Follow this timeline for recovery</p>
+                            </div>
+                        </div>
+
+                        <div class="grid grid-cols-1 sm:grid-cols-3 gap-3">
+                            <div class="rounded-2xl bg-gradient-to-br from-rose-50 to-orange-50 border border-rose-200 p-4">
+                                <div class="flex items-center gap-2 mb-3">
+                                    <div class="w-7 h-7 rounded-lg bg-rose-500 text-white flex items-center justify-center text-xs font-black">1</div>
+                                    <h6 class="text-xs font-black text-rose-900 uppercase tracking-wider">Today</h6>
+                                </div>
+                                <ul class="space-y-2">
+                                    {% for action in prediction.timeline['today'] %}
+                                    <li class="text-[11px] text-slate-700 leading-relaxed flex items-start gap-1.5">
+                                        <i class="fa-solid fa-check text-rose-600 mt-0.5 flex-shrink-0 text-[9px]"></i>
+                                        <span>{{ action }}</span>
+                                    </li>
+                                    {% endfor %}
+                                </ul>
+                            </div>
+
+                            <div class="rounded-2xl bg-gradient-to-br from-amber-50 to-yellow-50 border border-amber-200 p-4">
+                                <div class="flex items-center gap-2 mb-3">
+                                    <div class="w-7 h-7 rounded-lg bg-amber-500 text-white flex items-center justify-center text-xs font-black">2</div>
+                                    <h6 class="text-xs font-black text-amber-900 uppercase tracking-wider">This Week</h6>
+                                </div>
+                                <ul class="space-y-2">
+                                    {% for action in prediction.timeline['week'] %}
+                                    <li class="text-[11px] text-slate-700 leading-relaxed flex items-start gap-1.5">
+                                        <i class="fa-solid fa-check text-amber-600 mt-0.5 flex-shrink-0 text-[9px]"></i>
+                                        <span>{{ action }}</span>
+                                    </li>
+                                    {% endfor %}
+                                </ul>
+                            </div>
+
+                            <div class="rounded-2xl bg-gradient-to-br from-emerald-50 to-teal-50 border border-emerald-200 p-4">
+                                <div class="flex items-center gap-2 mb-3">
+                                    <div class="w-7 h-7 rounded-lg bg-emerald-500 text-white flex items-center justify-center text-xs font-black">3</div>
+                                    <h6 class="text-xs font-black text-emerald-900 uppercase tracking-wider">Ongoing</h6>
+                                </div>
+                                <ul class="space-y-2">
+                                    {% for action in prediction.timeline['ongoing'] %}
+                                    <li class="text-[11px] text-slate-700 leading-relaxed flex items-start gap-1.5">
+                                        <i class="fa-solid fa-check text-emerald-600 mt-0.5 flex-shrink-0 text-[9px]"></i>
+                                        <span>{{ action }}</span>
+                                    </li>
+                                    {% endfor %}
+                                </ul>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- ── Treatment & Cure ── -->
+                    <div class="relative overflow-hidden bg-gradient-to-br from-brand-600 to-emerald-600 rounded-3xl shadow-2xl shadow-brand-500/30 p-6 text-white">
+                        <div class="absolute -right-8 -bottom-8 w-40 h-40 bg-white/10 rounded-full blur-2xl pointer-events-none"></div>
+                        <div class="relative flex items-start gap-4">
+                            <div class="w-11 h-11 rounded-2xl bg-white/20 backdrop-blur flex items-center justify-center flex-shrink-0 border border-white/30">
+                                <i class="fa-solid fa-kit-medical text-lg"></i>
+                            </div>
+                            <div class="min-w-0 flex-1">
+                                <h5 class="text-sm font-black mb-1.5">Recommended Treatment</h5>
+                                <p class="text-sm text-white/95 leading-relaxed">{{ prediction.treatment }}</p>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- ── Prevention Tips ── -->
+                    {% if prediction.prevention_tips %}
+                    <div class="bg-white rounded-3xl shadow-xl border border-slate-100 overflow-hidden">
+                        <div class="flex items-stretch">
+                            <div class="w-1 bg-gradient-to-b from-amber-400 to-orange-500"></div>
+                            <div class="flex-1 p-6">
+                                <div class="flex items-center gap-3 mb-3">
+                                    <div class="w-11 h-11 rounded-2xl bg-amber-100 text-amber-700 flex items-center justify-center flex-shrink-0">
+                                        <i class="fa-solid fa-shield-virus"></i>
+                                    </div>
+                                    <h5 class="text-sm font-black text-slate-900">Prevention Tips & Best Practices</h5>
+                                </div>
+                                <ul class="space-y-2">
+                                    {% for tip in prediction.prevention_tips %}
+                                    <li class="text-xs text-slate-700 leading-relaxed flex items-start gap-2 bg-amber-50/50 rounded-xl px-3 py-2">
+                                        <i class="fa-solid fa-shield-halved text-amber-600 mt-0.5 flex-shrink-0 text-[10px]"></i>
+                                        <span>{{ tip }}</span>
+                                    </li>
+                                    {% endfor %}
+                                </ul>
+                            </div>
+                        </div>
+                    </div>
+                    {% endif %}
+
+                    <!-- ── Recommended Products ── -->
+                    {% if recommended and not prediction.is_healthy %}
+                    <div class="bg-white rounded-3xl shadow-xl border border-slate-100 p-6">
+                        <div class="flex items-center gap-3 mb-4">
+                            <div class="w-11 h-11 rounded-2xl bg-brand-100 text-brand-700 flex items-center justify-center flex-shrink-0">
+                                <i class="fa-solid fa-cart-shopping"></i>
+                            </div>
+                            <h5 class="text-sm font-black text-slate-900">Recommended Products</h5>
+                        </div>
+                        <div class="grid grid-cols-1 sm:grid-cols-3 gap-3">
+                            {% for p in recommended %}
+                            <a href="/shop?category={{ p.category }}" class="group block bg-slate-50 hover:bg-gradient-to-br hover:from-brand-50 hover:to-emerald-50 border border-slate-200 hover:border-brand-400 rounded-2xl p-4 transition-all hover:shadow-lg">
+                                <div class="text-[10px] font-black uppercase text-brand-600 tracking-wider">{{ p.category }}</div>
+                                <div class="text-xs font-bold text-slate-800 mt-1 leading-snug group-hover:text-brand-700">{{ p.name }}</div>
+                                <div class="text-base font-black text-brand-700 mt-2">₹{{ '%.2f'|format(p.price) }}</div>
+                            </a>
+                            {% endfor %}
+                        </div>
+                    </div>
+                    {% endif %}
+
+                    <!-- ── Quick Actions ── -->
+                    <div class="flex flex-col sm:flex-row gap-3">
+                        <a href="/history" class="flex-1 inline-flex items-center justify-center gap-2 bg-white hover:bg-slate-50 border border-slate-200 text-slate-700 font-bold px-5 py-3.5 rounded-2xl transition-all text-sm shadow-sm hover:shadow-md">
+                            <i class="fa-solid fa-clock-rotate-left"></i> View History
+                        </a>
+                        <a href="/detect" class="flex-1 inline-flex items-center justify-center gap-2 bg-gradient-to-r from-brand-600 to-emerald-600 hover:from-brand-700 hover:to-emerald-700 text-white font-bold px-5 py-3.5 rounded-2xl transition-all text-sm shadow-lg shadow-brand-500/30">
+                            <i class="fa-solid fa-rotate-left"></i> Scan Another Plant
+                        </a>
+                    </div>
+                </div>
+
+                {% else %}
+                <!-- ═══ Empty State ═══ -->
+                <div class="relative bg-gradient-to-br from-white to-brand-50/40 rounded-3xl shadow-xl border border-slate-100 p-8 sm:p-12 text-center flex flex-col items-center justify-center min-h-[500px] overflow-hidden">
+                    <div class="absolute -top-16 -right-16 w-64 h-64 bg-brand-100 rounded-full blur-3xl pointer-events-none"></div>
+                    <div class="absolute -bottom-16 -left-16 w-64 h-64 bg-emerald-100 rounded-full blur-3xl pointer-events-none"></div>
+
+                    <div class="relative">
+                        <div class="relative w-28 h-28 rounded-[2rem] bg-gradient-to-tr from-brand-500 to-emerald-500 flex items-center justify-center text-white text-5xl shadow-2xl shadow-brand-500/40 mb-6 mx-auto">
+                            <i class="fa-solid fa-leaf"></i>
+                        </div>
+                        <div class="absolute -bottom-2 -right-2 w-10 h-10 rounded-2xl bg-white border-2 border-brand-200 flex items-center justify-center text-brand-600">
+                            <i class="fa-solid fa-camera text-sm"></i>
+                        </div>
+                    </div>
+
+                    <h3 class="text-2xl sm:text-3xl font-black text-slate-900 mb-2">Ready to Diagnose</h3>
+                    <p class="text-slate-500 text-sm max-w-md mx-auto mb-8 leading-relaxed">
+                        Upload a plant leaf photo on the left and let our AI do the rest. You'll get a complete health report in seconds.
+                    </p>
+
+                    <div class="grid grid-cols-3 gap-3 w-full max-w-lg">
+                        <div class="bg-white rounded-2xl p-4 border border-slate-100 shadow-sm">
+                            <div class="text-2xl font-black text-brand-600">39+</div>
+                            <div class="text-[10px] font-bold text-slate-500 uppercase tracking-wider mt-1">Conditions</div>
+                        </div>
+                        <div class="bg-white rounded-2xl p-4 border border-slate-100 shadow-sm">
+                            <div class="text-2xl font-black text-brand-600">~2s</div>
+                            <div class="text-[10px] font-bold text-slate-500 uppercase tracking-wider mt-1">Response</div>
+                        </div>
+                        <div class="bg-white rounded-2xl p-4 border border-slate-100 shadow-sm">
+                            <div class="text-2xl font-black text-brand-600">100%</div>
+                            <div class="text-[10px] font-bold text-slate-500 uppercase tracking-wider mt-1">Free</div>
+                        </div>
+                    </div>
+                </div>
+                {% endif %}
+            </div>
+        </div>
+
+        <!-- ═══ How It Works ═══ -->
+        {% if not result %}
+        <div class="mt-16 sm:mt-20">
+            <div class="text-center mb-8">
+                <span class="inline-block text-[10px] font-black text-brand-600 uppercase tracking-widest mb-2">How it works</span>
+                <h2 class="text-2xl sm:text-3xl font-black text-slate-900">Three Steps to Healthier Plants</h2>
+            </div>
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-5">
+                <div class="group bg-white rounded-3xl p-6 border border-slate-100 shadow-sm hover:shadow-xl transition-all relative overflow-hidden">
+                    <div class="absolute top-4 right-4 text-6xl font-black text-brand-50 select-none">1</div>
+                    <div class="relative w-12 h-12 rounded-2xl bg-brand-100 text-brand-700 flex items-center justify-center text-lg mb-4 group-hover:scale-110 transition-transform">
+                        <i class="fa-solid fa-camera"></i>
+                    </div>
+                    <h4 class="text-base font-black text-slate-900 mb-1.5 relative">Upload Photo</h4>
+                    <p class="text-sm text-slate-600 leading-relaxed relative">Take a clear photo of your plant's leaf and upload it to our scanner.</p>
+                </div>
+                <div class="group bg-white rounded-3xl p-6 border border-slate-100 shadow-sm hover:shadow-xl transition-all relative overflow-hidden">
+                    <div class="absolute top-4 right-4 text-6xl font-black text-emerald-50 select-none">2</div>
+                    <div class="relative w-12 h-12 rounded-2xl bg-emerald-100 text-emerald-700 flex items-center justify-center text-lg mb-4 group-hover:scale-110 transition-transform">
+                        <i class="fa-solid fa-brain"></i>
+                    </div>
+                    <h4 class="text-base font-black text-slate-900 mb-1.5 relative">AI Analysis</h4>
+                    <p class="text-sm text-slate-600 leading-relaxed relative">Our TensorFlow model identifies the disease with high accuracy in seconds.</p>
+                </div>
+                <div class="group bg-white rounded-3xl p-6 border border-slate-100 shadow-sm hover:shadow-xl transition-all relative overflow-hidden">
+                    <div class="absolute top-4 right-4 text-6xl font-black text-teal-50 select-none">3</div>
+                    <div class="relative w-12 h-12 rounded-2xl bg-teal-100 text-teal-700 flex items-center justify-center text-lg mb-4 group-hover:scale-110 transition-transform">
+                        <i class="fa-solid fa-kit-medical"></i>
+                    </div>
+                    <h4 class="text-base font-black text-slate-900 mb-1.5 relative">Get Treatment</h4>
+                    <p class="text-sm text-slate-600 leading-relaxed relative">Receive a complete action plan with medicines and prevention tips.</p>
+                </div>
+            </div>
+        </div>
+        {% endif %}
+
+    </main>
+
+    <!-- ═══════════ Footer ═══════════ -->
+    <footer class="bg-white border-t border-slate-200 mt-16 py-8">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 flex flex-col sm:flex-row items-center justify-between gap-3">
+            <p class="text-sm text-slate-500 font-medium">&copy; 2026 PlantCare AI. All rights reserved.</p>
+            <div class="flex items-center gap-4 text-xs text-slate-400 font-medium">
+                <span class="flex items-center gap-1.5"><i class="fa-brands fa-python text-brand-600"></i> Flask</span>
+                <span>&bull;</span>
+                <span class="flex items-center gap-1.5"><i class="fa-solid fa-brain text-brand-600"></i> TensorFlow</span>
+            </div>
+        </div>
+    </footer>
+
+    <!-- ═══════════ Scripts ═══════════ -->
+    <script>
+        // Image upload preview
+        const imgInput = document.getElementById('imgInput');
+        const dropzonePrompt = document.getElementById('dropzonePrompt');
+        const previewContainer = document.getElementById('previewContainer');
+        const imagePreview = document.getElementById('imagePreview');
+        const fileName = document.getElementById('fileName');
+        const uploadForm = document.getElementById('uploadForm');
+        const loadingOverlay = document.getElementById('loadingOverlay');
+
+        imgInput.addEventListener('change', function(e) {
+            const file = e.target.files[0];
+            if (file) {
+                const reader = new FileReader();
+                reader.onload = function(ev) {
+                    imagePreview.src = ev.target.result;
+                    fileName.textContent = file.name;
+                    dropzonePrompt.classList.add('hidden');
+                    previewContainer.classList.remove('hidden');
+                    previewContainer.classList.add('flex');
+                };
+                reader.readAsDataURL(file);
+            }
+        });
+
+        uploadForm.addEventListener('submit', function() {
+            if (imgInput.files.length > 0) {
+                loadingOverlay.classList.remove('hidden');
+                loadingOverlay.classList.add('flex');
+            }
+        });
+
+        // FIX 2: Apply risk bar width from data-pct attribute
+        document.querySelectorAll('.risk-bar').forEach(function(bar) {
+            var pct = parseInt(bar.getAttribute('data-pct'), 10);
+            if (!isNaN(pct) && pct > 0 && pct <= 100) {
+                bar.style.width = pct + '%';
+            }
+        });
+    </script>
+</body>
+</html>
