@@ -11,8 +11,6 @@ import pymysql
 
 
 
-import os
-
 def get_db_connection():
     return pymysql.connect(
         host=os.environ.get('MYSQLHOST', 'localhost'),
@@ -23,13 +21,14 @@ def get_db_connection():
         cursorclass=pymysql.cursors.DictCursor
     )
 
+
 app = Flask(__name__)
-app.secret_key = 'plantcare-ai-super-secret-key-change-me'
+app.secret_key = os.environ.get('SECRET_KEY', 'plantcare-ai-dev-only-change-me')
 
 os.makedirs('./uploadimages', exist_ok=True)
 os.makedirs('./uploadimages/history', exist_ok=True)
 
-# ---------- MODEL ----------
+# ---------- MODEL (OpenRouter-based, no TensorFlow) ----------
 import base64
 import requests
 from PIL import Image
@@ -89,54 +88,94 @@ def uploaded_images(filename):
     return send_from_directory('./uploadimages', filename)
 
 
-
+# ═══════════════════════════════════════════════════════════════
+# OPENROUTER PREDICTION (replaces TensorFlow/Keras)
+# ═══════════════════════════════════════════════════════════════
 def model_predict(image_path):
+    api_key = os.environ.get('OPENROUTER_API_KEY')
+    if not api_key:
+        print("ERROR: OPENROUTER_API_KEY not set!")
+        return {
+            "name": "Configuration Error",
+            "cause": "AI service is not configured on the server.",
+            "cure": "Please contact the administrator to set OPENROUTER_API_KEY."
+        }
+
     try:
-        # Image ko base64 mein convert karein
+        # Image → base64
         with open(image_path, "rb") as f:
             image_data = base64.b64encode(f.read()).decode("utf-8")
 
-        # OpenRouter API ko request bhejein
+        # OpenRouter API call
         response = requests.post(
             url="https://openrouter.ai/api/v1/chat/completions",
             headers={
-                "Authorization": f"Bearer {os.environ.get('OPENROUTER_API_KEY')}",
+                "Authorization": f"Bearer {api_key}",
                 "Content-Type": "application/json",
+                "HTTP-Referer": "https://plantcare-ai.up.railway.app",
+                "X-Title": "PlantCare AI",
             },
             json={
-                # Ye free vision model use kar rahe hain
-                "model": "google/gemini-2.0-flash-exp:free", 
+                "model": "google/gemini-2.0-flash-exp:free",
                 "messages": [
                     {
                         "role": "user",
                         "content": [
-                            {"type": "text", "text": "Identify the plant disease in this leaf image. Reply ONLY with the exact disease name from the PlantVillage dataset (e.g., Tomato___Early_blight). Do not write any other text."},
-                            {"type": "image_url", "image_url": {"url": f"data:image/jpeg;base64,{image_data}"}}
+                            {
+                                "type": "text",
+                                "text": (
+                                    "Identify the plant disease in this leaf image. "
+                                    "Reply ONLY with the exact disease name from the PlantVillage dataset "
+                                    "(e.g., Tomato___Early_blight). Do not write any other text."
+                                )
+                            },
+                            {
+                                "type": "image_url",
+                                "image_url": {"url": f"data:image/jpeg;base64,{image_data}"}
+                            }
                         ]
                     }
                 ]
             },
             timeout=30
         )
-        
+
         result = response.json()
+
+        # Validate response shape
+        if 'choices' not in result or not result['choices']:
+            print(f"OpenRouter bad response: {result}")
+            return {
+                "name": "Analysis Failed",
+                "cause": "AI service returned an unexpected response.",
+                "cure": "Please try again in a moment."
+            }
+
         disease_name = result['choices'][0]['message']['content'].strip()
-        
-        # JSON file se match karke details nikaalein
+
+        # Match with local JSON
         for disease in plant_disease:
             if disease['name'].lower() == disease_name.lower():
                 return disease
-        
-        # Agar exact match na mile to default return karein
-        return {"name": disease_name, "cause": "AI detected this condition.", "cure": "Please consult an expert."}
-        
+
+        # Fallback if no exact match
+        return {
+            "name": disease_name,
+            "cause": "AI detected this condition.",
+            "cure": "Please consult an expert."
+        }
+
     except Exception as e:
         print(f"OpenRouter Error: {e}")
-        return {"name": "Analysis Failed", "cause": "Could not connect to AI service.", "cure": "Please try again later."}
+        return {
+            "name": "Analysis Failed",
+            "cause": "Could not connect to AI service.",
+            "cure": "Please try again later."
+        }
 
 
 # ═══════════════════════════════════════════════════════════════
-# ENRICH PREDICTION — adds timeline, symptoms, prevention, etc.
+# ENRICH PREDICTION
 # ═══════════════════════════════════════════════════════════════
 PREVENTION_TIPS = {
     'Fungal': [
@@ -212,11 +251,7 @@ SYMPTOMS_BY_TYPE = {
 }
 
 
-# ═══════════════════════════════════════════════════════════════
-# BUILD UNDERSTANDING — generates 3-4 line disease explanation
-# ═══════════════════════════════════════════════════════════════
 def build_understanding(pred, plant, disease_short, category, severity, is_healthy, is_background):
-    """Build a rich 3-4 line explanation combining cause + context."""
     if is_healthy:
         return (
             f"{plant} is currently healthy with no visible signs of disease. "
@@ -258,11 +293,8 @@ def build_understanding(pred, plant, disease_short, category, severity, is_healt
     ]
     return " ".join(s for s in sentences if s)
 
-# ═══════════════════════════════════════════════════════════════
-# BUILD TREATMENT — generates 3-4 line treatment plan explanation
-# ═══════════════════════════════════════════════════════════════
+
 def build_treatment(pred, plant, disease_short, category, severity, is_healthy, is_background):
-    """Build a rich 3-4 line treatment plan combining cure + method + timeline."""
     if is_healthy:
         return (
             f"No medical treatment is required — {plant.lower()} is in good health. "
@@ -282,7 +314,6 @@ def build_treatment(pred, plant, disease_short, category, severity, is_healthy, 
     if cure_text and not cure_text.endswith('.'):
         cure_text += '.'
 
-    # ─── Category-specific application method ───
     category_method = {
         'Fungal': (
             "Apply a recommended fungicide (copper-based or systemic) as a foliar spray, "
@@ -311,7 +342,6 @@ def build_treatment(pred, plant, disease_short, category, severity, is_healthy, 
         ),
     }.get(category, "")
 
-    # ─── Severity-specific urgency + follow-up ───
     severity_followup = {
         'High': (
             "Given the HIGH severity, begin treatment today and isolate the plant from healthy ones. "
@@ -327,15 +357,11 @@ def build_treatment(pred, plant, disease_short, category, severity, is_healthy, 
         ),
     }.get(severity, "")
 
-    sentences = [
-        cure_text,
-        category_method,
-        severity_followup,
-    ]
+    sentences = [cure_text, category_method, severity_followup]
     return " ".join(s for s in sentences if s)
 
+
 def enrich_prediction(pred):
-    """Transform raw prediction dict into rich UI fields."""
     name = pred.get('name', '')
     parts = name.split('___')
 
@@ -460,7 +486,6 @@ def enrich_prediction(pred):
         'symptoms': symptoms,
         'timeline': timeline,
         'prevention_tips': PREVENTION_TIPS.get(category, PREVENTION_TIPS['Unknown']),
-        # 🆕 3-4 line detailed explanation
         'understanding': build_understanding(pred, plant, disease_short, category, severity, is_healthy, is_background),
         'treatment': build_treatment(pred, plant, disease_short, category, severity, is_healthy, is_background),
     }
@@ -469,7 +494,6 @@ def enrich_prediction(pred):
 # ---------- PUBLIC PAGES ----------
 @app.route('/')
 def root():
-    """Landing → ALWAYS Overview"""
     return redirect(url_for('overview'))
 
 
@@ -480,7 +504,6 @@ def overview():
 
 @app.route('/detect')
 def detect():
-    """Scanner / detection page (with temp-file cleanup)"""
     upload_folder = os.path.abspath('./uploadimages')
     if os.path.exists(upload_folder):
         now = time.time()
@@ -492,7 +515,6 @@ def detect():
                         os.remove(path)
                 except Exception:
                     pass
-
     return render_template('home.html')
 
 
@@ -545,7 +567,6 @@ def uploadimage():
     prediction = model_predict(f'./{image_path_full}')
     prediction = enrich_prediction(prediction)
 
-    # save permanent copy + history row if logged in
     if session.get('user_id'):
         try:
             history_name = f"diag_{uuid.uuid4().hex}_{image.filename}"
@@ -566,7 +587,6 @@ def uploadimage():
         except Exception as e:
             print(f"History save error: {e}")
 
-    # fetch a few recommended products
     recommended = []
     try:
         conn = get_db_connection()
@@ -876,13 +896,10 @@ def admin_delete_message(mid):
     flash('Message deleted.', 'success')
     return redirect(url_for('admin'))
 
-# ═══════════════════════════════════════════════════════════════
-# ADMIN — DELETE USER
-# ═══════════════════════════════════════════════════════════════
+
 @app.route('/admin/user/<int:uid>/delete', methods=['POST'])
 @admin_required
 def admin_delete_user(uid):
-    # Safety 1: Admin khud ko delete nahi kar sakta
     if uid == session.get('user_id'):
         flash('You cannot delete your own account.', 'danger')
         return redirect(url_for('admin'))
@@ -890,24 +907,19 @@ def admin_delete_user(uid):
     conn = get_db_connection()
     try:
         with conn.cursor() as cur:
-            # Check user exists + get their role
             cur.execute("SELECT id, name, email, role FROM users WHERE id=%s", (uid,))
             user = cur.fetchone()
             if not user:
                 flash('User not found.', 'warning')
                 return redirect(url_for('admin'))
 
-            # Safety 2: Doosre admin ko bhi delete mat karo (optional)
             if user['role'] == 'admin':
                 flash('Cannot delete another admin. Demote them first.', 'danger')
                 return redirect(url_for('admin'))
 
-            # Delete related records (in case FK cascade not set)
             cur.execute("DELETE FROM order_items WHERE order_id IN (SELECT id FROM orders WHERE user_id=%s)", (uid,))
             cur.execute("DELETE FROM orders WHERE user_id=%s", (uid,))
             cur.execute("DELETE FROM diagnosis_history WHERE user_id=%s", (uid,))
-
-            # Delete the user
             cur.execute("DELETE FROM users WHERE id=%s", (uid,))
 
         conn.commit()
@@ -921,5 +933,7 @@ def admin_delete_user(uid):
     return redirect(url_for('admin'))
 
 
-if __name__ == "__main__":
-    app.run(debug=True)
+# ---------- LOCAL DEV ONLY ----------
+# Gunicorn uses `app:app`; do NOT run with debug=True in production.
+# if __name__ == "__main__":
+#     app.run(debug=True)

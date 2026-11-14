@@ -1,14 +1,27 @@
 FROM python:3.11-slim
 
-# Working directory set karein
+# System deps for Pillow
+RUN apt-get update && apt-get install -y --no-install-recommends \
+    gcc \
+    libjpeg-dev \
+    zlib1g-dev \
+    && rm -rf /var/lib/apt/lists/*
+
 WORKDIR /app
 
-# Requirements copy karein aur install karein (isme ab TensorFlow nahi hai)
+# Install Python deps first (layer caching)
 COPY requirements.txt .
 RUN pip install --no-cache-dir -r requirements.txt
 
-# Poora project copy karein
+# Copy app code
 COPY . .
 
-# App start karein
-CMD gunicorn app:app --bind 0.0.0.0:$PORT --workers 1 --threads 4 --timeout 120
+# Create upload directories
+RUN mkdir -p uploadimages/history
+
+# Railway uses PORT env var
+ENV PORT=8080
+EXPOSE 8080
+
+# Gunicorn start
+CMD gunicorn --bind 0.0.0.0:${PORT} --workers 2 --threads 4 --timeout 120 app:app

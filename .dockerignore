@@ -1,5 +1,13 @@
-models/
-uploadimages/
 __pycache__/
 *.pyc
+*.pyo
+*.pyd
 .git/
+.gitignore
+.env
+.env.*
+.vscode/
+.idea/
+*.log
+uploadimages/
+README.md
